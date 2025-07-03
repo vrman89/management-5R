@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Manajemen 5R</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Icons: Lucide -->
+    <script src="https://unpkg.com/lucide@0.378.0/dist/umd/lucide.min.js"></script>
+
+    <!-- Chart.js for charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- jsPDF for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
+    <!-- SheetJS (xlsx) for Excel export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #64748b;
+            border-radius: 10px;
+        }
+        .dark ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+        /* Hide number input arrows */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200 transition-colors duration-300">
+
+    <div id="app-container" class="flex h-screen">
+        <!-- Sidebar Navigation -->
+        <aside class="w-64 bg-white dark:bg-slate-800/50 backdrop-blur-sm border-r border-slate-200 dark:border-slate-700 flex flex-col transition-colors duration-300">
+            <div class="p-4 border-b border-slate-200 dark:border-slate-700 flex items-center gap-3">
+                <div class="bg-sky-500 p-2 rounded-lg">
+                    <i data-lucide="scan-line" class="text-white"></i>
+                </div>
+                <h1 class="text-xl font-bold text-sky-500">Manajemen 5R</h1>
+            </div>
+            <nav class="flex-1 p-4 space-y-2">
+                <a href="#" data-page="dashboard" class="nav-link flex items-center gap-3 px-4 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-sky-500 hover:text-white font-medium">
+                    <i data-lucide="layout-dashboard"></i> Dasbor
+                </a>
+                <a href="#" data-page="audit" class="nav-link flex items-center gap-3 px-4 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-sky-500 hover:text-white font-medium">
+                    <i data-lucide="clipboard-check"></i> Audit 5R
+                </a>
+                <a href="#" data-page="laporan" class="nav-link flex items-center gap-3 px-4 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-sky-500 hover:text-white font-medium">
+                    <i data-lucide="file-text"></i> Laporan
+                </a>
+                <a href="#" data-page="pengaturan" class="nav-link flex items-center gap-3 px-4 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-sky-500 hover:text-white font-medium">
+                    <i data-lucide="settings"></i> Pengaturan
+                </a>
+            </nav>
+            <div class="p-4 border-t border-slate-200 dark:border-slate-700">
+                <div class="text-xs text-slate-400 mb-2">User ID:</div>
+                <div id="userIdDisplay" class="text-xs text-slate-500 dark:text-slate-400 break-all">Loading...</div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6 overflow-y-auto">
+            <!-- Dashboard Page -->
+            <div id="page-dashboard" class="page-content">
+                <h2 class="text-3xl font-bold mb-6">Dasbor</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Summary Cards -->
+                    <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md">
+                        <div class="flex items-center gap-4">
+                            <div class="bg-sky-100 dark:bg-sky-900/50 p-3 rounded-full"><i data-lucide="users" class="text-sky-500"></i></div>
+                            <div>
+                                <p class="text-slate-500 dark:text-slate-400">Total Karyawan</p>
+                                <p id="totalKaryawan" class="text-2xl font-bold">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md">
+                        <div class="flex items-center gap-4">
+                            <div class="bg-emerald-100 dark:bg-emerald-900/50 p-3 rounded-full"><i data-lucide="building-2" class="text-emerald-500"></i></div>
+                            <div>
+                                <p class="text-slate-500 dark:text-slate-400">Total Workshop</p>
+                                <p id="totalWorkshop" class="text-2xl font-bold">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md">
+                        <div class="flex items-center gap-4">
+                            <div class="bg-amber-100 dark:bg-amber-900/50 p-3 rounded-full"><i data-lucide="clipboard-list" class="text-amber-500"></i></div>
+                            <div>
+                                <p class="text-slate-500 dark:text-slate-400">Total Audit</p>
+                                <p id="totalAudit" class="text-2xl font-bold">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top 3 Leaderboards -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+                    <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md">
+                        <h3 class="text-xl font-bold mb-4">3 Karyawan Terbaik</h3>
+                        <ol id="topEmployeesList" class="space-y-4"></ol>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md">
+                        <h3 class="text-xl font-bold mb-4">3 Workshop Terbaik</h3>
+                        <ol id="topWorkshopsList" class="space-y-4"></ol>
+                    </div>
+                </div>
+
+                <!-- Main Leaderboard Chart -->
+                <div class="mt-8 bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md">
+                    <h3 class="text-xl font-bold mb-4">Klasemen Karyawan (Top 10)</h3>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Berdasarkan skor rata-rata dari semua audit.</p>
+                    <div class="h-96">
+                        <canvas id="leaderboardChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Audit 5R Page -->
+            <div id="page-audit" class="page-content hidden">
+                <h2 class="text-3xl font-bold mb-6">Lakukan Audit 5R</h2>
+                <form id="auditForm" class="bg-white dark:bg-slate-800 p-8 rounded-xl shadow-md max-w-4xl mx-auto">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <label for="auditKaryawan" class="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-2">Karyawan yang Diaudit</label>
+                            <select id="auditKaryawan" required class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg p-3 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none"></select>
+                        </div>
+                        <div>
+                            <label for="auditWorkshop" class="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-2">Lokasi/Workshop</label>
+                            <select id="auditWorkshop" required class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg p-3 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none"></select>
+                        </div>
+                    </div>
+                    
+                    <div id="auditCriteriaContainer" class="space-y-8">
+                        <!-- Audit criteria will be injected here by JS -->
+                    </div>
+
+                    <div class="mt-8 text-right">
+                        <button type="submit" class="bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-300 flex items-center gap-2 ml-auto">
+                            <i data-lucide="save"></i> Simpan Hasil Audit
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Laporan Page -->
+            <div id="page-laporan" class="page-content hidden">
+                <h2 class="text-3xl font-bold mb-2">Laporan Audit</h2>
+                <p class="text-slate-500 dark:text-slate-400 mb-6">Lihat semua riwayat audit dan ekspor data.</p>
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-bold">Riwayat Audit</h3>
+                        <div class="flex gap-2">
+                            <button id="exportPdfBtn" class="bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg flex items-center gap-2 transition-colors">
+                                <i data-lucide="file-type-2"></i> PDF
+                            </button>
+                            <button id="exportExcelBtn" class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg flex items-center gap-2 transition-colors">
+                                <i data-lucide="file-spreadsheet"></i> Excel
+                            </button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead class="text-xs text-slate-700 dark:text-slate-300 uppercase bg-slate-50 dark:bg-slate-700">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3">Tanggal</th>
+                                    <th scope="col" class="px-6 py-3">Karyawan</th>
+                                    <th scope="col" class="px-6 py-3">Workshop</th>
+                                    <th scope="col" class="px-6 py-3">Skor</th>
+                                    <th scope="col" class="px-6 py-3">Detail</th>
+                                </tr>
+                            </thead>
+                            <tbody id="laporanTableBody">
+                                <!-- Data will be injected here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pengaturan Page -->
+            <div id="page-pengaturan" class="page-content hidden">
+                <h2 class="text-3xl font-bold mb-6">Pengaturan</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Manajemen Karyawan -->
+                    <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md">
+                        <h3 class="text-xl font-bold mb-4">Manajemen Karyawan</h3>
+                        <form id="formKaryawan" class="space-y-4 mb-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="nikKaryawan" class="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1">NIK</label>
+                                    <input type="text" id="nikKaryawan" placeholder="e.g., 12345" required class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg p-2 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none">
+                                </div>
+                                <div>
+                                    <label for="namaKaryawan" class="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1">Nama Karyawan</label>
+                                    <input type="text" id="namaKaryawan" placeholder="e.g., Budi Santoso" required class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg p-2 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none">
+                                </div>
+                            </div>
+                            <button type="submit" class="w-full bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center gap-2">
+                                <i data-lucide="plus"></i> Tambah Karyawan
+                            </button>
+                        </form>
+                        <ul id="listKaryawan" class="space-y-2 max-h-60 overflow-y-auto"></ul>
+                    </div>
+
+                    <!-- Manajemen Workshop -->
+                    <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md">
+                        <h3 class="text-xl font-bold mb-4">Manajemen Workshop</h3>
+                        <form id="formWorkshop" class="flex gap-2 mb-4">
+                            <input type="text" id="namaWorkshop" placeholder="Nama Workshop Baru" required class="flex-grow bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg p-2 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none">
+                            <button type="submit" class="bg-sky-500 hover:bg-sky-600 text-white font-medium p-2 rounded-lg flex items-center justify-center"><i data-lucide="plus"></i></button>
+                        </form>
+                        <ul id="listWorkshop" class="space-y-2 max-h-60 overflow-y-auto"></ul>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal for details and confirmation -->
+    <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 hidden z-50">
+        <div id="modalContent" class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-lg p-6 transform transition-all scale-95 opacity-0">
+             <!-- Modal content will be injected here -->
+        </div>
+    </div>
+    
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-3 px-5 rounded-lg shadow-xl translate-y-20 opacity-0 transition-all duration-300">
+        <p id="toastMessage"></p>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, addDoc, doc, deleteDoc, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- CONFIGURATION & INITIALIZATION ---
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { apiKey: "YOUR_API_KEY", authDomain: "YOUR_AUTH_DOMAIN", projectId: "YOUR_PROJECT_ID" };
+        const appId = typeof __app_id !== 'undefined' ? __app_id : '5r-app-default';
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        // setLogLevel('debug');
+
+        // Global state
+        let userId = null;
+        let employees = [];
+        let workshops = [];
+        let audits = [];
+        let leaderboardChart = null;
+
+        const AUDIT_CATEGORIES = [
+            { id: 'ringkas', name: '1R - Ringkas (Seiri)', description: 'Memilah barang yang perlu dan tidak perlu.' },
+            { id: 'rapi', name: '2R - Rapi (Seiton)', description: 'Menata barang sesuai tempatnya.' },
+            { id: 'resik', name: '3R - Resik (Seiso)', description: 'Membersihkan area kerja secara rutin.' },
+            { id: 'rawat', name: '4R - Rawat (Seiketsu)', description: 'Mempertahankan kondisi standar kebersihan.' },
+            { id: 'rajin', name: '5R - Rajin (Shitsuke)', description: 'Menjadikan 5R sebagai kebiasaan.' },
+        ];
+
+        // --- AUTHENTICATION ---
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                userId = user.uid;
+                document.getElementById('userIdDisplay').textContent = userId;
+                initializeAppState();
+            } else {
+                console.log("User not signed in. Attempting to sign in.");
+                try {
+                    if (initialAuthToken) {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                } catch (error) {
+                    console.error("Authentication failed:", error);
+                    document.getElementById('userIdDisplay').textContent = "Authentication Failed";
+                }
+            }
+        });
+
+        // --- INITIALIZE APP STATE ---
+        function initializeAppState() {
+            if (!userId) return;
+            console.log(`User ${userId} authenticated. Initializing app...`);
+            setupEventListeners();
+            fetchData();
+            renderAuditCriteria();
+            showPage('dashboard');
+        }
+
+        // --- DATA FETCHING (REAL-TIME) ---
+        function fetchData() {
+            const publicDataPath = `artifacts/${appId}/public/data`;
+
+            // Fetch Employees
+            onSnapshot(collection(db, `${publicDataPath}/employees`), (snapshot) => {
+                employees = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderEmployeeList();
+                renderEmployeeDropdown();
+                updateDashboardCards();
+                calculateAndRenderEmployeeLeaderboard();
+            });
+
+            // Fetch Workshops
+            onSnapshot(collection(db, `${publicDataPath}/workshops`), (snapshot) => {
+                workshops = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderWorkshopList();
+                renderWorkshopDropdown();
+                updateDashboardCards();
+                calculateAndRenderWorkshopLeaderboard();
+            });
+            
+            // Fetch Audits
+            onSnapshot(collection(db, `${publicDataPath}/audits`), (snapshot) => {
+                audits = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderLaporanTable();
+                updateDashboardCards();
+                calculateAndRenderEmployeeLeaderboard();
+                calculateAndRenderWorkshopLeaderboard();
+            });
+        }
+
+        // --- UI RENDERING ---
+
+        function renderEmployeeList() {
+            const list = document.getElementById('listKaryawan');
+            list.innerHTML = employees.map(emp => `
+                <li class="flex justify-between items-center p-3 bg-slate-100 dark:bg-slate-700/50 rounded-lg">
+                    <div>
+                        <p class="font-medium">${emp.name}</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">NIK: ${emp.nik || 'N/A'}</p>
+                    </div>
+                    <button data-id="${emp.id}" class="delete-karyawan text-red-500 hover:text-red-700 p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                </li>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function renderWorkshopList() {
+            const list = document.getElementById('listWorkshop');
+            list.innerHTML = workshops.map(ws => `
+                <li class="flex justify-between items-center p-2 bg-slate-100 dark:bg-slate-700/50 rounded-lg">
+                    <span>${ws.name}</span>
+                    <button data-id="${ws.id}" class="delete-workshop text-red-500 hover:text-red-700"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                </li>
+            `).join('');
+            lucide.createIcons();
+        }
+        
+        function renderEmployeeDropdown() {
+            const select = document.getElementById('auditKaryawan');
+            select.innerHTML = '<option value="" disabled selected>Pilih Karyawan</option>' + employees.map(emp => `<option value="${emp.id}">${emp.name} (${emp.nik || 'N/A'})</option>`).join('');
+        }
+        
+        function renderWorkshopDropdown() {
+            const select = document.getElementById('auditWorkshop');
+            select.innerHTML = '<option value="" disabled selected>Pilih Workshop</option>' + workshops.map(ws => `<option value="${ws.id}">${ws.name}</option>`).join('');
+        }
+
+        function renderAuditCriteria() {
+            const container = document.getElementById('auditCriteriaContainer');
+            container.innerHTML = AUDIT_CATEGORIES.map(cat => `
+                <div class="border-t dark:border-slate-700 pt-6">
+                    <h4 class="text-lg font-bold">${cat.name}</h4>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">${cat.description}</p>
+                    <div class="flex items-center justify-center space-x-2 sm:space-x-4" data-category="${cat.id}">
+                        ${[1,2,3,4,5].map(score => `
+                            <label class="flex flex-col items-center cursor-pointer">
+                                <input type="radio" name="${cat.id}" value="${score}" class="peer sr-only" required>
+                                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-lg font-bold border-2 border-slate-300 dark:border-slate-600 peer-checked:bg-sky-500 peer-checked:text-white peer-checked:border-sky-500 transition-all">${score}</div>
+                                <span class="text-xs mt-1 text-slate-500">${score === 1 ? 'Buruk' : score === 5 ? 'Baik' : ''}</span>
+                            </label>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateDashboardCards() {
+            document.getElementById('totalKaryawan').textContent = employees.length;
+            document.getElementById('totalWorkshop').textContent = workshops.length;
+            document.getElementById('totalAudit').textContent = audits.length;
+        }
+        
+        function renderLaporanTable() {
+            const body = document.getElementById('laporanTableBody');
+            if (audits.length === 0) {
+                body.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-slate-500">Belum ada data audit.</td></tr>`;
+                return;
+            }
+            body.innerHTML = audits
+                .sort((a, b) => b.timestamp.seconds - a.timestamp.seconds) // Sort newest first
+                .map(audit => {
+                    const employee = employees.find(e => e.id === audit.employeeId);
+                    const workshop = workshops.find(w => w.id === audit.workshopId);
+                    return `
+                        <tr class="bg-white dark:bg-slate-800 border-b dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600/50">
+                            <td class="px-6 py-4 font-medium">${new Date(audit.timestamp.seconds * 1000).toLocaleDateString('id-ID')}</td>
+                            <td class="px-6 py-4">${employee ? `${employee.name} (${employee.nik || 'N/A'})` : 'N/A'}</td>
+                            <td class="px-6 py-4">${workshop ? workshop.name : 'N/A'}</td>
+                            <td class="px-6 py-4 font-bold text-sky-500">${audit.totalScore}</td>
+                            <td class="px-6 py-4">
+                                <button class="view-detail-btn text-sky-500 hover:underline" data-id="${audit.id}">Lihat</button>
+                            </td>
+                        </tr>
+                    `;
+            }).join('');
+        }
+        
+        function calculateAndRenderEmployeeLeaderboard() {
+            if (audits.length === 0 || employees.length === 0) {
+                renderEmptyLeaderboard();
+                return;
+            }
+
+            const scores = {};
+            audits.forEach(audit => {
+                if (!scores[audit.employeeId]) {
+                    scores[audit.employeeId] = { total: 0, count: 0 };
+                }
+                scores[audit.employeeId].total += audit.totalScore;
+                scores[audit.employeeId].count++;
+            });
+
+            const leaderboardData = Object.keys(scores).map(employeeId => {
+                const employee = employees.find(e => e.id === employeeId);
+                return {
+                    name: employee ? employee.name : 'Unknown',
+                    avgScore: scores[employeeId].total / scores[employeeId].count
+                };
+            }).sort((a, b) => b.avgScore - a.avgScore);
+            
+            renderTopPerformers(leaderboardData.slice(0, 3), 'topEmployeesList');
+            renderLeaderboardChart(leaderboardData.slice(0, 10));
+        }
+
+        function calculateAndRenderWorkshopLeaderboard() {
+            if (audits.length === 0 || workshops.length === 0) {
+                renderEmptyTopPerformers('topWorkshopsList', 'workshop');
+                return;
+            }
+
+            const scores = {};
+            audits.forEach(audit => {
+                if (!scores[audit.workshopId]) {
+                    scores[audit.workshopId] = { total: 0, count: 0 };
+                }
+                scores[audit.workshopId].total += audit.totalScore;
+                scores[audit.workshopId].count++;
+            });
+
+            const leaderboardData = Object.keys(scores).map(workshopId => {
+                const workshop = workshops.find(w => w.id === workshopId);
+                return {
+                    name: workshop ? workshop.name : 'Unknown',
+                    avgScore: scores[workshopId].total / scores[workshopId].count
+                };
+            }).sort((a, b) => b.avgScore - a.avgScore);
+            
+            renderTopPerformers(leaderboardData.slice(0, 3), 'topWorkshopsList');
+        }
+
+        function renderTopPerformers(data, listId) {
+            const listElement = document.getElementById(listId);
+            const trophyColors = ['text-amber-400', 'text-slate-400', 'text-amber-600'];
+            
+            if(data.length === 0) {
+                renderEmptyTopPerformers(listId, listId === 'topEmployeesList' ? 'karyawan' : 'workshop');
+                return;
+            }
+
+            listElement.innerHTML = data.map((item, index) => `
+                <li class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg">
+                    <div class="flex items-center gap-4">
+                        <i data-lucide="trophy" class="${trophyColors[index] || 'text-slate-500'}"></i>
+                        <div>
+                            <p class="font-semibold">${item.name}</p>
+                            <p class="text-sm text-slate-500 dark:text-slate-400">Skor: ${item.avgScore.toFixed(2)}</p>
+                        </div>
+                    </div>
+                    <div class="text-lg font-bold text-slate-400 dark:text-slate-500">#${index + 1}</div>
+                </li>
+            `).join('');
+            lucide.createIcons();
+        }
+        
+        function renderEmptyTopPerformers(listId, type) {
+             const listElement = document.getElementById(listId);
+             listElement.innerHTML = `<li class="text-center text-slate-500 py-4">Belum ada data ${type}.</li>`;
+        }
+        
+        function renderEmptyLeaderboard() {
+            if(leaderboardChart) leaderboardChart.destroy();
+            const ctx = document.getElementById('leaderboardChart').getContext('2d');
+            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            ctx.font = "16px Inter";
+            ctx.fillStyle = document.body.classList.contains('dark') ? '#94a3b8' : '#64748b';
+            ctx.textAlign = "center";
+            ctx.fillText("Data tidak cukup untuk menampilkan klasemen.", ctx.canvas.width / 2, ctx.canvas.height / 2);
+            renderEmptyTopPerformers('topEmployeesList', 'karyawan');
+        }
+
+        function renderLeaderboardChart(data) {
+            const ctx = document.getElementById('leaderboardChart').getContext('2d');
+            if (leaderboardChart) {
+                leaderboardChart.destroy();
+            }
+            leaderboardChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.map(d => d.name),
+                    datasets: [{
+                        label: 'Skor Rata-rata',
+                        data: data.map(d => d.avgScore.toFixed(2)),
+                        backgroundColor: 'rgba(14, 165, 233, 0.6)',
+                        borderColor: 'rgba(14, 165, 233, 1)',
+                        borderWidth: 1,
+                        borderRadius: 5,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 25, // Max score is 5 * 5 categories
+                            grid: { color: document.body.classList.contains('dark') ? '#334155' : '#e2e8f0' },
+                            ticks: { color: document.body.classList.contains('dark') ? '#94a3b8' : '#64748b' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: document.body.classList.contains('dark') ? '#94a3b8' : '#64748b' }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        // --- EVENT LISTENERS & HANDLERS ---
+        function setupEventListeners() {
+            // Page Navigation
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    showPage(e.currentTarget.dataset.page);
+                });
+            });
+
+            // Settings Forms
+            document.getElementById('formKaryawan').addEventListener('submit', handleAddKaryawan);
+            document.getElementById('formWorkshop').addEventListener('submit', handleAddWorkshop);
+            
+            // Delete buttons (using event delegation)
+            document.getElementById('listKaryawan').addEventListener('click', handleDeleteKaryawan);
+            document.getElementById('listWorkshop').addEventListener('click', handleDeleteWorkshop);
+
+            // Audit form
+            document.getElementById('auditForm').addEventListener('submit', handleSaveAudit);
+            
+            // Report exports
+            document.getElementById('exportPdfBtn').addEventListener('click', exportToPDF);
+            document.getElementById('exportExcelBtn').addEventListener('click', exportToExcel);
+
+            // Detail Modal
+            document.getElementById('laporanTableBody').addEventListener('click', handleViewDetail);
+            document.getElementById('modal').addEventListener('click', (e) => {
+                if(e.target.id === 'modal') closeModal();
+            });
+        }
+        
+        function handleAddKaryawan(e) {
+            e.preventDefault();
+            const nikInput = document.getElementById('nikKaryawan');
+            const nameInput = document.getElementById('namaKaryawan');
+            const nik = nikInput.value.trim();
+            const name = nameInput.value.trim();
+
+            if (name && nik) {
+                addDoc(collection(db, `artifacts/${appId}/public/data/employees`), { name, nik });
+                nikInput.value = '';
+                nameInput.value = '';
+                showToast('Karyawan berhasil ditambahkan.');
+            }
+        }
+
+        function handleAddWorkshop(e) {
+            e.preventDefault();
+            const input = document.getElementById('namaWorkshop');
+            const name = input.value.trim();
+            if (name) {
+                addDoc(collection(db, `artifacts/${appId}/public/data/workshops`), { name });
+                input.value = '';
+                showToast('Workshop berhasil ditambahkan.');
+            }
+        }
+        
+        function handleDeleteKaryawan(e) {
+            const button = e.target.closest('.delete-karyawan');
+            if (button) {
+                const docId = button.dataset.id;
+                const employee = employees.find(e => e.id === docId);
+                showConfirmationModal(`Yakin ingin menghapus karyawan "${employee.name}" (NIK: ${employee.nik})?`, () => {
+                     deleteDoc(doc(db, `artifacts/${appId}/public/data/employees`, docId));
+                     showToast('Karyawan berhasil dihapus.');
+                });
+            }
+        }
+        
+        function handleDeleteWorkshop(e) {
+            const button = e.target.closest('.delete-workshop');
+            if (button) {
+                const docId = button.dataset.id;
+                const workshop = workshops.find(w => w.id === docId);
+                showConfirmationModal(`Yakin ingin menghapus workshop "${workshop.name}"?`, () => {
+                    deleteDoc(doc(db, `artifacts/${appId}/public/data/workshops`, docId));
+                    showToast('Workshop berhasil dihapus.');
+                });
+            }
+        }
+
+        function handleSaveAudit(e) {
+            e.preventDefault();
+            const form = e.target;
+            const employeeId = form.querySelector('#auditKaryawan').value;
+            const workshopId = form.querySelector('#auditWorkshop').value;
+            
+            if(!employeeId || !workshopId) {
+                showToast('Harap pilih karyawan dan workshop.', 'error');
+                return;
+            }
+
+            const scores = {};
+            let totalScore = 0;
+            let allAnswered = true;
+            AUDIT_CATEGORIES.forEach(cat => {
+                const selected = form.querySelector(`input[name="${cat.id}"]:checked`);
+                if(selected) {
+                    const score = parseInt(selected.value);
+                    scores[cat.id] = score;
+                    totalScore += score;
+                } else {
+                    allAnswered = false;
+                }
+            });
+
+            if(!allAnswered) {
+                showToast('Harap isi semua kriteria audit.', 'error');
+                return;
+            }
+
+            const auditData = {
+                employeeId,
+                workshopId,
+                scores,
+                totalScore,
+                timestamp: new Date()
+            };
+
+            addDoc(collection(db, `artifacts/${appId}/public/data/audits`), auditData)
+                .then(() => {
+                    showToast('Audit berhasil disimpan.');
+                    form.reset();
+                    showPage('laporan');
+                })
+                .catch(err => {
+                    console.error("Error saving audit:", err);
+                    showToast('Gagal menyimpan audit.', 'error');
+                });
+        }
+
+        function handleViewDetail(e) {
+            const button = e.target.closest('.view-detail-btn');
+            if (button) {
+                const auditId = button.dataset.id;
+                const audit = audits.find(a => a.id === auditId);
+                if (audit) {
+                    const employee = employees.find(e => e.id === audit.employeeId);
+                    const workshop = workshops.find(w => w.id === audit.workshopId);
+                    
+                    const modalContent = document.getElementById('modalContent');
+                    modalContent.innerHTML = `
+                        <div class="flex justify-between items-start">
+                             <h3 class="text-2xl font-bold mb-4">Detail Audit</h3>
+                             <button id="closeModalBtn" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"><i data-lucide="x"></i></button>
+                        </div>
+                        <div class="space-y-4 text-sm">
+                            <p><strong>Tanggal:</strong> ${new Date(audit.timestamp.seconds * 1000).toLocaleString('id-ID')}</p>
+                            <p><strong>Karyawan:</strong> ${employee ? `${employee.name} (NIK: ${employee.nik || 'N/A'})` : 'N/A'}</p>
+                            <p><strong>Workshop:</strong> ${workshop ? workshop.name : 'N/A'}</p>
+                            <p class="text-lg"><strong>Total Skor:</strong> <span class="font-bold text-sky-500">${audit.totalScore}</span></p>
+                            <div class="border-t dark:border-slate-700 pt-4 mt-4">
+                                <h4 class="font-bold mb-2">Rincian Skor:</h4>
+                                <ul class="list-disc list-inside space-y-1">
+                                    ${Object.entries(audit.scores).map(([key, value]) => {
+                                        const category = AUDIT_CATEGORIES.find(c => c.id === key);
+                                        return `<li><strong>${category.name}:</strong> ${value}</li>`;
+                                    }).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                    `;
+                    openModal();
+                    document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+                }
+            }
+        }
+
+        // --- UTILITY FUNCTIONS ---
+        function showPage(pageId) {
+            document.querySelectorAll('.page-content').forEach(page => page.classList.add('hidden'));
+            document.getElementById(`page-${pageId}`).classList.remove('hidden');
+
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('bg-sky-500', 'text-white');
+                if (link.dataset.page === pageId) {
+                    link.classList.add('bg-sky-500', 'text-white');
+                }
+            });
+            // Re-render charts if dashboard is shown
+            if (pageId === 'dashboard') {
+                calculateAndRenderEmployeeLeaderboard();
+                calculateAndRenderWorkshopLeaderboard();
+            }
+        }
+        
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            
+            toastMessage.textContent = message;
+            toast.classList.remove('bg-slate-900', 'bg-red-600');
+            toast.classList.add(type === 'success' ? 'bg-slate-900' : 'bg-red-600');
+            
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        function openModal() {
+            const modal = document.getElementById('modal');
+            const modalContent = document.getElementById('modalContent');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modalContent.classList.remove('scale-95', 'opacity-0');
+            }, 10);
+            lucide.createIcons();
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('modal');
+            const modalContent = document.getElementById('modalContent');
+            modalContent.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 200);
+        }
+
+        function showConfirmationModal(message, onConfirm) {
+            const modalContent = document.getElementById('modalContent');
+            modalContent.innerHTML = `
+                <h3 class="text-xl font-bold mb-4">Konfirmasi</h3>
+                <p class="text-slate-600 dark:text-slate-300 mb-6">${message}</p>
+                <div class="flex justify-end gap-3">
+                    <button id="cancelBtn" class="px-4 py-2 rounded-lg bg-slate-200 dark:bg-slate-600 hover:bg-slate-300 dark:hover:bg-slate-500">Batal</button>
+                    <button id="confirmBtn" class="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600">Hapus</button>
+                </div>
+            `;
+            openModal();
+            document.getElementById('cancelBtn').addEventListener('click', closeModal);
+            document.getElementById('confirmBtn').addEventListener('click', () => {
+                onConfirm();
+                closeModal();
+            });
+        }
+        
+        // --- EXPORT FUNCTIONS ---
+        function exportToPDF() {
+            if (audits.length === 0) {
+                showToast('Tidak ada data untuk diekspor.', 'error');
+                return;
+            }
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            doc.setFontSize(18);
+            doc.text("Laporan Audit 5R", 14, 22);
+            doc.setFontSize(11);
+            doc.setTextColor(100);
+            doc.text(`Tanggal Ekspor: ${new Date().toLocaleDateString('id-ID')}`, 14, 30);
+
+            const tableData = audits.map(audit => {
+                const employee = employees.find(e => e.id === audit.employeeId);
+                const workshop = workshops.find(w => w.id === audit.workshopId);
+                return [
+                    new Date(audit.timestamp.seconds * 1000).toLocaleDateString('id-ID'),
+                    employee ? employee.nik : 'N/A',
+                    employee ? employee.name : 'N/A',
+                    workshop ? workshop.name : 'N/A',
+                    audit.totalScore
+                ];
+            });
+
+            doc.autoTable({
+                startY: 35,
+                head: [['Tanggal', 'NIK', 'Karyawan', 'Workshop', 'Total Skor']],
+                body: tableData,
+                theme: 'grid',
+                headStyles: { fillColor: [14, 165, 233] }
+            });
+
+            doc.save('laporan-audit-5r.pdf');
+            showToast('Laporan PDF berhasil dibuat.');
+        }
+
+        function exportToExcel() {
+            if (audits.length === 0) {
+                showToast('Tidak ada data untuk diekspor.', 'error');
+                return;
+            }
+            const dataToExport = audits.map(audit => {
+                const employee = employees.find(e => e.id === audit.employeeId);
+                const workshop = workshops.find(w => w.id === audit.workshopId);
+                return {
+                    'Tanggal': new Date(audit.timestamp.seconds * 1000).toLocaleDateString('id-ID'),
+                    'NIK': employee ? employee.nik : 'N/A',
+                    'Karyawan': employee ? employee.name : 'N/A',
+                    'Workshop': workshop ? workshop.name : 'N/A',
+                    'Skor Ringkas': audit.scores.ringkas,
+                    'Skor Rapi': audit.scores.rapi,
+                    'Skor Resik': audit.scores.resik,
+                    'Skor Rawat': audit.scores.rawat,
+                    'Skor Rajin': audit.scores.rajin,
+                    'Total Skor': audit.totalScore
+                };
+            });
+
+            const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Laporan Audit 5R");
+            XLSX.writeFile(workbook, "Laporan-Audit-5R.xlsx");
+            showToast('Laporan Excel berhasil dibuat.');
+        }
+
+
+        // Final setup
+        window.onload = () => {
+            lucide.createIcons();
+        };
+
+    </script>
+</body>
+</html>
