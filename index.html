@@ -60,7 +60,37 @@
 </head>
 <body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200 transition-colors duration-300">
 
-    <div id="app-container" class="flex h-screen">
+    <!-- Login Screen -->
+    <div id="login-screen" class="flex items-center justify-center h-screen">
+        <div class="w-full max-w-md p-8 space-y-8 bg-white dark:bg-slate-800 rounded-2xl shadow-xl">
+            <div class="text-center">
+                 <div class="mx-auto bg-sky-500 p-3 rounded-lg w-fit mb-4">
+                    <i data-lucide="scan-line" class="text-white h-8 w-8"></i>
+                </div>
+                <h2 class="text-3xl font-bold text-slate-900 dark:text-white">Login Aplikasi 5R</h2>
+                <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Silakan masuk untuk melanjutkan</p>
+            </div>
+            <form id="login-form" class="space-y-6">
+                <div>
+                    <label for="username" class="text-sm font-medium text-slate-700 dark:text-slate-300">Username</label>
+                    <input id="username" name="username" type="text" required class="mt-2 w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none" placeholder="Username">
+                </div>
+                <div>
+                    <label for="password" class="text-sm font-medium text-slate-700 dark:text-slate-300">Password</label>
+                    <input id="password" name="password" type="password" required class="mt-2 w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none" placeholder="Password">
+                </div>
+                <p id="login-error" class="text-sm text-red-500 text-center hidden"></p>
+                <div>
+                    <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-sky-500 hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500">
+                        Login
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main App Container (Initially Hidden) -->
+    <div id="app-container" class="flex h-screen hidden">
         <!-- Sidebar Navigation -->
         <aside class="w-64 bg-white dark:bg-slate-800/50 backdrop-blur-sm border-r border-slate-200 dark:border-slate-700 flex flex-col transition-colors duration-300">
             <div class="p-4 border-b border-slate-200 dark:border-slate-700 flex items-center gap-3">
@@ -79,11 +109,14 @@
                 <a href="#" data-page="laporan" class="nav-link flex items-center gap-3 px-4 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-sky-500 hover:text-white font-medium">
                     <i data-lucide="file-text"></i> Laporan
                 </a>
-                <a href="#" data-page="pengaturan" class="nav-link flex items-center gap-3 px-4 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-sky-500 hover:text-white font-medium">
+                <a href="#" data-page="pengaturan" id="nav-pengaturan" class="nav-link flex items-center gap-3 px-4 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-sky-500 hover:text-white font-medium">
                     <i data-lucide="settings"></i> Pengaturan
                 </a>
             </nav>
             <div class="p-4 border-t border-slate-200 dark:border-slate-700">
+                 <button id="logoutBtn" class="w-full flex items-center justify-center gap-2 px-4 py-2 mb-4 rounded-lg text-slate-600 dark:text-slate-300 bg-slate-200 dark:bg-slate-700 hover:bg-red-500 hover:text-white font-medium transition-colors">
+                    <i data-lucide="log-out" class="w-4 h-4"></i> Log Out
+                </button>
                 <div class="text-xs text-slate-400 mb-2">User ID:</div>
                 <div id="userIdDisplay" class="text-xs text-slate-500 dark:text-slate-400 break-all">Loading...</div>
             </div>
@@ -244,6 +277,39 @@
                         <ul id="listWorkshop" class="space-y-2 max-h-60 overflow-y-auto"></ul>
                     </div>
                 </div>
+                <!-- Manajemen Pengguna -->
+                <div class="mt-8 bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md">
+                    <h3 class="text-xl font-bold mb-4">Manajemen Pengguna</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3">Tambah Pengguna Baru</h4>
+                            <form id="formPengguna" class="space-y-4">
+                                <div>
+                                    <label for="usernamePengguna" class="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1">Username</label>
+                                    <input type="text" id="usernamePengguna" required class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg p-2 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none">
+                                </div>
+                                <div>
+                                    <label for="passwordPengguna" class="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1">Password</label>
+                                    <input type="password" id="passwordPengguna" required class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg p-2 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none">
+                                </div>
+                                <div>
+                                    <label for="rolePengguna" class="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1">Nama Bagian</label>
+                                    <select id="rolePengguna" required class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg p-2 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none">
+                                        <option value="Admin">Admin</option>
+                                        <option value="Auditor">Auditor</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="w-full bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center gap-2">
+                                    <i data-lucide="user-plus"></i> Tambah Pengguna
+                                </button>
+                            </form>
+                        </div>
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3">Daftar Pengguna</h4>
+                            <ul id="listPengguna" class="space-y-2 max-h-60 overflow-y-auto"></ul>
+                        </div>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
@@ -265,7 +331,14 @@
         // Import Firebase modules
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, addDoc, doc, deleteDoc, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, addDoc, doc, deleteDoc, setLogLevel, getDocs, query, where, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- DOM ELEMENTS ---
+        const loginScreen = document.getElementById('login-screen');
+        const loginForm = document.getElementById('login-form');
+        const loginError = document.getElementById('login-error');
+        const appContainer = document.getElementById('app-container');
+        const logoutBtn = document.getElementById('logoutBtn');
 
         // --- CONFIGURATION & INITIALIZATION ---
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { apiKey: "YOUR_API_KEY", authDomain: "YOUR_AUTH_DOMAIN", projectId: "YOUR_PROJECT_ID" };
@@ -279,6 +352,8 @@
 
         // Global state
         let userId = null;
+        let loggedInUserRole = null;
+        let appUsers = [];
         let employees = [];
         let workshops = [];
         let audits = [];
@@ -291,32 +366,94 @@
             { id: 'rawat', name: '4R - Rawat (Seiketsu)', description: 'Mempertahankan kondisi standar kebersihan.' },
             { id: 'rajin', name: '5R - Rajin (Shitsuke)', description: 'Menjadikan 5R sebagai kebiasaan.' },
         ];
+        
+        // --- LOGIN & AUTHENTICATION FLOW ---
+        
+        function handleAuthentication() {
+             onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    userId = user.uid;
+                    document.getElementById('userIdDisplay').textContent = userId;
+                    await initializeLoginScreenData();
+                } else {
+                    try {
+                        if (initialAuthToken) {
+                            await signInWithCustomToken(auth, initialAuthToken);
+                        } else {
+                            await signInAnonymously(auth);
+                        }
+                    } catch (error) {
+                        console.error("Firebase Authentication failed:", error);
+                        loginError.textContent = "Gagal mengautentikasi dengan server.";
+                        loginError.classList.remove('hidden');
+                    }
+                }
+            });
+        }
 
-        // --- AUTHENTICATION ---
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                userId = user.uid;
-                document.getElementById('userIdDisplay').textContent = userId;
+        async function initializeLoginScreenData() {
+            const publicDataPath = `artifacts/${appId}/public/data`;
+            const usersCollection = collection(db, `${publicDataPath}/users`);
+            
+            try {
+                const q = query(usersCollection, where("username", "==", "admin"));
+                const querySnapshot = await getDocs(q);
+                if (querySnapshot.empty) {
+                    console.log("Default admin user not found. Creating one...");
+                    await addDoc(usersCollection, { username: "admin", password: "admin", role: "Admin" });
+                }
+
+                const usersSnapshot = await getDocs(usersCollection);
+                appUsers = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                console.log("App users list fetched for login:", appUsers);
+
+            } catch (error) {
+                console.error("Error initializing login screen data:", error);
+                loginError.textContent = "Gagal memuat data pengguna. Periksa izin database.";
+                loginError.classList.remove('hidden');
+            }
+        }
+
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = e.target.username.value;
+            const password = e.target.password.value;
+
+            const foundUser = appUsers.find(u => u.username === username && u.password === password);
+
+            if (foundUser) {
+                loggedInUserRole = foundUser.role;
+                loginScreen.classList.add('hidden');
+                appContainer.classList.remove('hidden');
                 initializeAppState();
             } else {
-                console.log("User not signed in. Attempting to sign in.");
-                try {
-                    if (initialAuthToken) {
-                        await signInWithCustomToken(auth, initialAuthToken);
-                    } else {
-                        await signInAnonymously(auth);
-                    }
-                } catch (error) {
-                    console.error("Authentication failed:", error);
-                    document.getElementById('userIdDisplay').textContent = "Authentication Failed";
-                }
+                loginError.textContent = 'Username atau password salah.';
+                loginError.classList.remove('hidden');
             }
         });
 
-        // --- INITIALIZE APP STATE ---
+        logoutBtn.addEventListener('click', () => {
+            loggedInUserRole = null;
+            appContainer.classList.add('hidden');
+            loginScreen.classList.remove('hidden');
+            loginForm.reset();
+            loginError.classList.add('hidden');
+        });
+
+        // --- MAIN APP LOGIC (POST-LOGIN) ---
         function initializeAppState() {
-            if (!userId) return;
-            console.log(`User ${userId} authenticated. Initializing app...`);
+            if (!userId) {
+                console.error("Cannot initialize app state without a user ID.");
+                return;
+            };
+            
+            const pengaturanNav = document.getElementById('nav-pengaturan');
+            if (loggedInUserRole === 'Admin') {
+                pengaturanNav.style.display = 'flex';
+            } else {
+                pengaturanNav.style.display = 'none';
+            }
+
             setupEventListeners();
             fetchData();
             renderAuditCriteria();
@@ -327,7 +464,11 @@
         function fetchData() {
             const publicDataPath = `artifacts/${appId}/public/data`;
 
-            // Fetch Employees
+             onSnapshot(collection(db, `${publicDataPath}/users`), (snapshot) => {
+                appUsers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderUserList();
+            });
+
             onSnapshot(collection(db, `${publicDataPath}/employees`), (snapshot) => {
                 employees = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 renderEmployeeList();
@@ -336,7 +477,6 @@
                 calculateAndRenderEmployeeLeaderboard();
             });
 
-            // Fetch Workshops
             onSnapshot(collection(db, `${publicDataPath}/workshops`), (snapshot) => {
                 workshops = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 renderWorkshopList();
@@ -345,7 +485,6 @@
                 calculateAndRenderWorkshopLeaderboard();
             });
             
-            // Fetch Audits
             onSnapshot(collection(db, `${publicDataPath}/audits`), (snapshot) => {
                 audits = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 renderLaporanTable();
@@ -356,6 +495,29 @@
         }
 
         // --- UI RENDERING ---
+
+        function renderUserList() {
+            const list = document.getElementById('listPengguna');
+            list.innerHTML = appUsers.map(user => {
+                let actionButtons = `<button data-id="${user.id}" class="edit-pengguna text-sky-500 hover:text-sky-700 p-1"><i data-lucide="edit" class="w-4 h-4"></i></button>`;
+                if (user.username !== 'admin') {
+                    actionButtons += `<button data-id="${user.id}" class="delete-pengguna text-red-500 hover:text-red-700 p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button>`;
+                }
+
+                return `
+                    <li class="flex justify-between items-center p-3 bg-slate-100 dark:bg-slate-700/50 rounded-lg">
+                        <div>
+                            <p class="font-medium">${user.username}</p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Bagian: ${user.role}</p>
+                        </div>
+                        <div class="flex gap-2">
+                            ${actionButtons}
+                        </div>
+                    </li>
+                `;
+            }).join('');
+            lucide.createIcons();
+        }
 
         function renderEmployeeList() {
             const list = document.getElementById('listKaryawan');
@@ -577,7 +739,6 @@
 
         // --- EVENT LISTENERS & HANDLERS ---
         function setupEventListeners() {
-            // Page Navigation
             document.querySelectorAll('.nav-link').forEach(link => {
                 link.addEventListener('click', (e) => {
                     e.preventDefault();
@@ -585,26 +746,60 @@
                 });
             });
 
-            // Settings Forms
             document.getElementById('formKaryawan').addEventListener('submit', handleAddKaryawan);
             document.getElementById('formWorkshop').addEventListener('submit', handleAddWorkshop);
+            document.getElementById('formPengguna').addEventListener('submit', handleAddPengguna);
             
-            // Delete buttons (using event delegation)
             document.getElementById('listKaryawan').addEventListener('click', handleDeleteKaryawan);
             document.getElementById('listWorkshop').addEventListener('click', handleDeleteWorkshop);
+            document.getElementById('listPengguna').addEventListener('click', handleUserActions);
 
-            // Audit form
             document.getElementById('auditForm').addEventListener('submit', handleSaveAudit);
             
-            // Report exports
             document.getElementById('exportPdfBtn').addEventListener('click', exportToPDF);
             document.getElementById('exportExcelBtn').addEventListener('click', exportToExcel);
 
-            // Detail Modal
             document.getElementById('laporanTableBody').addEventListener('click', handleViewDetail);
             document.getElementById('modal').addEventListener('click', (e) => {
-                if(e.target.id === 'modal') closeModal();
+                if(e.target.id === 'modal' || e.target.closest('.modal-close')) closeModal();
             });
+        }
+        
+        function handleUserActions(e) {
+            const deleteButton = e.target.closest('.delete-pengguna');
+            const editButton = e.target.closest('.edit-pengguna');
+
+            if (deleteButton) {
+                const docId = deleteButton.dataset.id;
+                const user = appUsers.find(u => u.id === docId);
+                showConfirmationModal(`Yakin ingin menghapus pengguna "${user.username}"?`, () => {
+                     deleteDoc(doc(db, `artifacts/${appId}/public/data/users`, docId));
+                     showToast('Pengguna berhasil dihapus.');
+                });
+            }
+
+            if (editButton) {
+                const docId = editButton.dataset.id;
+                showEditUserModal(docId);
+            }
+        }
+
+        function handleAddPengguna(e) {
+            e.preventDefault();
+            const form = e.target;
+            const username = form.usernamePengguna.value.trim();
+            const password = form.passwordPengguna.value.trim();
+            const role = form.rolePengguna.value;
+
+            if (username && password && role) {
+                if (appUsers.some(u => u.username === username)) {
+                    showToast('Username sudah ada.', 'error');
+                    return;
+                }
+                addDoc(collection(db, `artifacts/${appId}/public/data/users`), { username, password, role });
+                form.reset();
+                showToast('Pengguna berhasil ditambahkan.');
+            }
         }
         
         function handleAddKaryawan(e) {
@@ -720,7 +915,7 @@
                     modalContent.innerHTML = `
                         <div class="flex justify-between items-start">
                              <h3 class="text-2xl font-bold mb-4">Detail Audit</h3>
-                             <button id="closeModalBtn" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"><i data-lucide="x"></i></button>
+                             <button class="modal-close text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"><i data-lucide="x"></i></button>
                         </div>
                         <div class="space-y-4 text-sm">
                             <p><strong>Tanggal:</strong> ${new Date(audit.timestamp.seconds * 1000).toLocaleString('id-ID')}</p>
@@ -739,13 +934,16 @@
                         </div>
                     `;
                     openModal();
-                    document.getElementById('closeModalBtn').addEventListener('click', closeModal);
                 }
             }
         }
 
         // --- UTILITY FUNCTIONS ---
         function showPage(pageId) {
+            if (pageId === 'pengaturan' && loggedInUserRole !== 'Admin') {
+                showToast('Anda tidak memiliki akses ke halaman ini.', 'error');
+                return;
+            }
             document.querySelectorAll('.page-content').forEach(page => page.classList.add('hidden'));
             document.getElementById(`page-${pageId}`).classList.remove('hidden');
 
@@ -755,7 +953,6 @@
                     link.classList.add('bg-sky-500', 'text-white');
                 }
             });
-            // Re-render charts if dashboard is shown
             if (pageId === 'dashboard') {
                 calculateAndRenderEmployeeLeaderboard();
                 calculateAndRenderWorkshopLeaderboard();
@@ -801,15 +998,87 @@
                 <h3 class="text-xl font-bold mb-4">Konfirmasi</h3>
                 <p class="text-slate-600 dark:text-slate-300 mb-6">${message}</p>
                 <div class="flex justify-end gap-3">
-                    <button id="cancelBtn" class="px-4 py-2 rounded-lg bg-slate-200 dark:bg-slate-600 hover:bg-slate-300 dark:hover:bg-slate-500">Batal</button>
+                    <button class="modal-close px-4 py-2 rounded-lg bg-slate-200 dark:bg-slate-600 hover:bg-slate-300 dark:hover:bg-slate-500">Batal</button>
                     <button id="confirmBtn" class="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600">Hapus</button>
                 </div>
             `;
             openModal();
-            document.getElementById('cancelBtn').addEventListener('click', closeModal);
             document.getElementById('confirmBtn').addEventListener('click', () => {
                 onConfirm();
                 closeModal();
+            });
+        }
+
+        function showEditUserModal(userId) {
+            const user = appUsers.find(u => u.id === userId);
+            if (!user) return;
+
+            const isAdmin = user.username === 'admin';
+
+            const modalContent = document.getElementById('modalContent');
+            modalContent.innerHTML = `
+                <div class="flex justify-between items-start">
+                    <h3 class="text-2xl font-bold mb-4">Edit Pengguna</h3>
+                    <button class="modal-close text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"><i data-lucide="x"></i></button>
+                </div>
+                <form id="editUserForm" data-id="${userId}" class="space-y-4">
+                    <div>
+                        <label for="editUsername" class="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1">Username</label>
+                        <input type="text" id="editUsername" value="${user.username}" required class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg p-2 ${isAdmin ? 'bg-slate-200 dark:bg-slate-600 cursor-not-allowed' : ''}" ${isAdmin ? 'disabled' : ''}>
+                    </div>
+                    <div>
+                        <label for="editPassword" class="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1">Password Baru (opsional)</label>
+                        <input type="password" id="editPassword" placeholder="Biarkan kosong jika tidak berubah" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg p-2">
+                    </div>
+                    <div>
+                        <label for="editRole" class="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1">Nama Bagian</label>
+                        <select id="editRole" required class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg p-2 ${isAdmin ? 'bg-slate-200 dark:bg-slate-600 cursor-not-allowed' : ''}" ${isAdmin ? 'disabled' : ''}>
+                            <option value="Admin" ${user.role === 'Admin' ? 'selected' : ''}>Admin</option>
+                            <option value="Auditor" ${user.role === 'Auditor' ? 'selected' : ''}>Auditor</option>
+                        </select>
+                    </div>
+                    <div class="flex justify-end gap-3 pt-4">
+                        <button type="button" class="modal-close px-4 py-2 rounded-lg bg-slate-200 dark:bg-slate-600 hover:bg-slate-300 dark:hover:bg-slate-500">Batal</button>
+                        <button type="submit" class="px-4 py-2 rounded-lg bg-sky-500 text-white hover:bg-sky-600">Simpan Perubahan</button>
+                    </div>
+                </form>
+            `;
+            openModal();
+
+            document.getElementById('editUserForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const form = e.target;
+                const docId = form.dataset.id;
+                const originalUser = appUsers.find(u => u.id === docId);
+
+                const updatedData = {};
+                
+                const newPassword = form.editPassword.value.trim();
+                if (newPassword) {
+                    updatedData.password = newPassword;
+                }
+
+                if (originalUser.username !== 'admin') {
+                    const newUsername = form.editUsername.value.trim();
+                    const newRole = form.editRole.value;
+                    
+                    if (newUsername !== originalUser.username && appUsers.some(u => u.username === newUsername)) {
+                        showToast('Username baru sudah digunakan.', 'error');
+                        return;
+                    }
+                    updatedData.username = newUsername;
+                    updatedData.role = newRole;
+                }
+                
+                if (Object.keys(updatedData).length > 0) {
+                    const userDocRef = doc(db, `artifacts/${appId}/public/data/users`, docId);
+                    await updateDoc(userDocRef, updatedData);
+                    showToast('Data pengguna berhasil diperbarui.');
+                    closeModal();
+                } else {
+                    showToast('Tidak ada perubahan untuk disimpan.', 'info');
+                    closeModal();
+                }
             });
         }
         
@@ -885,6 +1154,7 @@
         // Final setup
         window.onload = () => {
             lucide.createIcons();
+            handleAuthentication();
         };
 
     </script>
