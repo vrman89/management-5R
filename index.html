@@ -341,7 +341,15 @@ This structure was chosen to separate distinct user tasks (viewing summaries, in
             toastMessage: document.getElementById('toastMessage'),
         };
 
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const firebaseConfig = {
+           apiKey: "AIzaSyCl9qzCOOVmJLjFVf1LVKRKrpTqu984Tbc",
+           authDomain: "manajemen-5r.firebaseapp.com",
+           projectId: "manajemen-5r",
+           storageBucket: "manajemen-5r.firebasestorage.app",
+           messagingSenderId: "1081253818594",
+           appId: "1:1081253818594:web:3c1285b9c483722bbd2ebb",
+           measurementId: "G-RXHZHK04WR"
+        };
         const appId = typeof __app_id !== 'undefined' ? __app_id : '5r-app-default';
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
