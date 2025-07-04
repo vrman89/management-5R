@@ -1,67 +1,61 @@
 <!DOCTYPE html>
+<!-- Chosen Palette: "Sky Blue & Slate" - A professional and calm palette using slate grays for backgrounds/text and a vibrant sky blue for primary actions and highlights, creating a clean, modern, and trustworthy feel for a data-oriented application. -->
+<!-- Application Structure Plan: A task-oriented Single Page Application (SPA) with a persistent sidebar for navigation. The structure is designed for an efficient user workflow:
+1.  **Login Screen**: Secure entry point.
+2.  **Main Container**: Post-login, holds the sidebar and main content area.
+3.  **Sidebar**: Provides clear, icon-driven navigation between the app's core functions (Dasbor, Audit, Laporan, Pengaturan), accessible based on user role. This constant navigation structure allows users to easily switch between tasks without losing context.
+4.  **Pages**:
+    * **Dasbor**: The landing page, designed as a high-level dashboard. It immediately informs the user of the program's status with summary cards and visual leaderboards. This prioritizes quick insights and performance comparison.
+    * **Audit**: A dedicated page for the primary task of data entry. A clean, multi-step form guides the user through the audit process, minimizing cognitive load.
+    * **Laporan**: A data exploration hub. A searchable and filterable table allows for detailed analysis of historical data, with export functionality for offline use.
+    * **Pengaturan**: A centralized control panel for administrators to manage all master data (Users, Employees, Workshops). Grouping these settings logically simplifies administrative tasks.
+This structure was chosen to separate distinct user tasks (viewing summaries, inputting data, analyzing details, managing settings) into clear, focused sections, enhancing usability and efficiency. -->
+<!-- Visualization & Content Choices:
+* **Report Info**: Overall program status (total employees, workshops, audits). -> **Goal**: Inform. -> **Viz/Method**: Styled numeric cards with icons. -> **Interaction**: None. -> **Justification**: Provides a quick, scannable overview of key metrics. -> **Library/Method**: HTML/Tailwind CSS.
+* **Report Info**: Top 3 performing employees and workshops. -> **Goal**: Compare/Highlight. -> **Viz/Method**: Styled ordered lists as leaderboards. -> **Interaction**: None. -> **Justification**: Immediately highlights top performers and encourages competition, a key driver in 5R programs. -> **Library/Method**: HTML/Tailwind CSS with Unicode icons (🏆).
+* **Report Info**: Overall employee performance ranking. -> **Goal**: Compare. -> **Viz/Method**: Vertical Bar Chart showing top 10 employees by average score. -> **Interaction**: Tooltip on hover shows exact score. -> **Justification**: A bar chart is the most effective way to visually compare scores across multiple distinct entities. -> **Library/Method**: Chart.js (Canvas).
+* **Report Info**: Complete audit history. -> **Goal**: Organize/Inform. -> **Viz/Method**: A comprehensive HTML table. -> **Interaction**: Clicking "Lihat" opens a detail modal. -> **Justification**: A table is the standard and most effective way to present detailed, structured data for review. The modal prevents context switching. -> **Library/Method**: HTML/Tailwind CSS, JS for modal.
+* **Report Info**: Detailed scores for a single audit. -> **Goal**: Inform (Drill-down). -> **Viz/Method**: A modal popup with a structured list of scores. -> **Interaction**: Close modal. -> **Justification**: Provides detailed information on demand without cluttering the main report view. -> **Library/Method**: JS-generated HTML in a modal.
+* **Report Info**: User, employee, and workshop master data. -> **Goal**: Organize/Manage. -> **Viz/Method**: Forms for adding, lists for displaying. -> **Interaction**: Add, Edit, Delete buttons triggering modals or actions. -> **Justification**: Standard CRUD interface is the most intuitive for data management tasks. -> **Library/Method**: HTML Forms, JS.
+-->
+<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aplikasi Manajemen 5R</title>
-
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- Icons: Lucide -->
     <script src="https://unpkg.com/lucide@0.378.0/dist/umd/lucide.min.js"></script>
-
-    <!-- Chart.js for charts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <!-- jsPDF for PDF export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-
-    <!-- SheetJS (xlsx) for Excel export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-        /* Custom scrollbar for better aesthetics */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f5f9;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #64748b;
-            border-radius: 10px;
-        }
-        .dark ::-webkit-scrollbar-track {
-            background: #1e293b;
-        }
-        .dark ::-webkit-scrollbar-thumb {
-            background: #475569;
-        }
-        /* Hide number input arrows */
+        body { font-family: 'Inter', sans-serif; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #64748b; border-radius: 10px; }
+        .dark ::-webkit-scrollbar-track { background: #1e293b; }
+        .dark ::-webkit-scrollbar-thumb { background: #475569; }
         input[type=number]::-webkit-inner-spin-button,
-        input[type=number]::-webkit-outer-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-        input[type=number] {
-            -moz-appearance: textfield;
-        }
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+        .loader { border-top-color: #38bdf8; animation: spinner 1.5s linear infinite; }
+        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200 transition-colors duration-300">
 
-    <!-- Login Screen -->
-    <div id="login-screen" class="flex items-center justify-center h-screen">
+    <div id="loading-overlay" class="fixed inset-0 bg-slate-900 bg-opacity-70 flex flex-col items-center justify-center z-50">
+        <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12 mb-4"></div>
+        <h2 id="loading-text" class="text-center text-white text-xl font-semibold">Menghubungkan ke Server...</h2>
+        <p class="w-2/3 text-center text-white mt-2 text-sm">Harap tunggu, sedang menyiapkan aplikasi.</p>
+    </div>
+
+    <div id="login-screen" class="flex items-center justify-center h-screen hidden">
         <div class="w-full max-w-md p-8 space-y-8 bg-white dark:bg-slate-800 rounded-2xl shadow-xl">
             <div class="text-center">
                  <div class="mx-auto bg-sky-500 p-3 rounded-lg w-fit mb-4">
@@ -81,7 +75,7 @@
                 </div>
                 <p id="login-error" class="text-sm text-red-500 text-center hidden"></p>
                 <div>
-                    <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-sky-500 hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500">
+                    <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-sky-500 hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 transition-colors">
                         Login
                     </button>
                 </div>
@@ -89,9 +83,7 @@
         </div>
     </div>
 
-    <!-- Main App Container (Initially Hidden) -->
     <div id="app-container" class="flex h-screen hidden">
-        <!-- Sidebar Navigation -->
         <aside class="w-64 bg-white dark:bg-slate-800/50 backdrop-blur-sm border-r border-slate-200 dark:border-slate-700 flex flex-col transition-colors duration-300">
             <div class="p-4 border-b border-slate-200 dark:border-slate-700 flex items-center gap-3">
                 <div class="bg-sky-500 p-2 rounded-lg">
@@ -103,7 +95,7 @@
                 <a href="#" data-page="dashboard" class="nav-link flex items-center gap-3 px-4 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-sky-500 hover:text-white font-medium">
                     <i data-lucide="layout-dashboard"></i> Dasbor
                 </a>
-                <a href="#" data-page="audit" class="nav-link flex items-center gap-3 px-4 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-sky-500 hover:text-white font-medium">
+                <a href="#" data-page="audit" id="nav-audit" class="nav-link flex items-center gap-3 px-4 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-sky-500 hover:text-white font-medium">
                     <i data-lucide="clipboard-check"></i> Audit 5R
                 </a>
                 <a href="#" data-page="laporan" class="nav-link flex items-center gap-3 px-4 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-sky-500 hover:text-white font-medium">
@@ -117,18 +109,15 @@
                  <button id="logoutBtn" class="w-full flex items-center justify-center gap-2 px-4 py-2 mb-4 rounded-lg text-slate-600 dark:text-slate-300 bg-slate-200 dark:bg-slate-700 hover:bg-red-500 hover:text-white font-medium transition-colors">
                     <i data-lucide="log-out" class="w-4 h-4"></i> Log Out
                 </button>
-                <div class="text-xs text-slate-400 mb-2">User ID:</div>
-                <div id="userIdDisplay" class="text-xs text-slate-500 dark:text-slate-400 break-all">Loading...</div>
+                <div class="text-xs text-slate-400 mb-1">Login sebagai:</div>
+                <div id="loggedInUserDisplay" class="text-sm font-semibold text-slate-700 dark:text-slate-200 break-words">Loading...</div>
             </div>
         </aside>
 
-        <!-- Main Content -->
         <main class="flex-1 p-6 overflow-y-auto">
-            <!-- Dashboard Page -->
             <div id="page-dashboard" class="page-content">
                 <h2 class="text-3xl font-bold mb-6">Dasbor</h2>
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <!-- Summary Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md">
                         <div class="flex items-center gap-4">
                             <div class="bg-sky-100 dark:bg-sky-900/50 p-3 rounded-full"><i data-lucide="users" class="text-sky-500"></i></div>
@@ -158,7 +147,6 @@
                     </div>
                 </div>
 
-                <!-- Top 3 Leaderboards -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
                     <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md">
                         <h3 class="text-xl font-bold mb-4">3 Karyawan Terbaik</h3>
@@ -170,17 +158,15 @@
                     </div>
                 </div>
 
-                <!-- Main Leaderboard Chart -->
                 <div class="mt-8 bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md">
                     <h3 class="text-xl font-bold mb-4">Klasemen Karyawan (Top 10)</h3>
                     <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Berdasarkan skor rata-rata dari semua audit.</p>
-                    <div class="h-96">
+                    <div class="chart-container h-96 relative">
                         <canvas id="leaderboardChart"></canvas>
                     </div>
                 </div>
             </div>
 
-            <!-- Audit 5R Page -->
             <div id="page-audit" class="page-content hidden">
                 <h2 class="text-3xl font-bold mb-6">Lakukan Audit 5R</h2>
                 <form id="auditForm" class="bg-white dark:bg-slate-800 p-8 rounded-xl shadow-md max-w-4xl mx-auto">
@@ -195,9 +181,7 @@
                         </div>
                     </div>
                     
-                    <div id="auditCriteriaContainer" class="space-y-8">
-                        <!-- Audit criteria will be injected here by JS -->
-                    </div>
+                    <div id="auditCriteriaContainer" class="space-y-8"></div>
 
                     <div class="mt-8 text-right">
                         <button type="submit" class="bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-300 flex items-center gap-2 ml-auto">
@@ -207,19 +191,18 @@
                 </form>
             </div>
 
-            <!-- Laporan Page -->
             <div id="page-laporan" class="page-content hidden">
                 <h2 class="text-3xl font-bold mb-2">Laporan Audit</h2>
                 <p class="text-slate-500 dark:text-slate-400 mb-6">Lihat semua riwayat audit dan ekspor data.</p>
                 <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md">
-                    <div class="flex justify-between items-center mb-4">
+                    <div class="flex flex-wrap justify-between items-center mb-4 gap-4">
                         <h3 class="text-xl font-bold">Riwayat Audit</h3>
                         <div class="flex gap-2">
                             <button id="exportPdfBtn" class="bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg flex items-center gap-2 transition-colors">
-                                <i data-lucide="file-type-2"></i> PDF
+                                <i data-lucide="file-type-2" class="w-4 h-4"></i> PDF
                             </button>
                             <button id="exportExcelBtn" class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg flex items-center gap-2 transition-colors">
-                                <i data-lucide="file-spreadsheet"></i> Excel
+                                <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Excel
                             </button>
                         </div>
                     </div>
@@ -231,22 +214,18 @@
                                     <th scope="col" class="px-6 py-3">Karyawan</th>
                                     <th scope="col" class="px-6 py-3">Workshop</th>
                                     <th scope="col" class="px-6 py-3">Skor</th>
-                                    <th scope="col" class="px-6 py-3">Detail</th>
+                                    <th scope="col" class="px-6 py-3 text-center">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody id="laporanTableBody">
-                                <!-- Data will be injected here -->
-                            </tbody>
+                            <tbody id="laporanTableBody"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <!-- Pengaturan Page -->
             <div id="page-pengaturan" class="page-content hidden">
                 <h2 class="text-3xl font-bold mb-6">Pengaturan</h2>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <!-- Manajemen Karyawan -->
                     <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md">
                         <h3 class="text-xl font-bold mb-4">Manajemen Karyawan</h3>
                         <form id="formKaryawan" class="space-y-4 mb-4">
@@ -264,20 +243,18 @@
                                 <i data-lucide="plus"></i> Tambah Karyawan
                             </button>
                         </form>
-                        <ul id="listKaryawan" class="space-y-2 max-h-60 overflow-y-auto"></ul>
+                        <ul id="listKaryawan" class="space-y-2 max-h-60 overflow-y-auto pr-2"></ul>
                     </div>
 
-                    <!-- Manajemen Workshop -->
                     <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md">
                         <h3 class="text-xl font-bold mb-4">Manajemen Workshop</h3>
                         <form id="formWorkshop" class="flex gap-2 mb-4">
                             <input type="text" id="namaWorkshop" placeholder="Nama Workshop Baru" required class="flex-grow bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg p-2 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none">
                             <button type="submit" class="bg-sky-500 hover:bg-sky-600 text-white font-medium p-2 rounded-lg flex items-center justify-center"><i data-lucide="plus"></i></button>
                         </form>
-                        <ul id="listWorkshop" class="space-y-2 max-h-60 overflow-y-auto"></ul>
+                        <ul id="listWorkshop" class="space-y-2 max-h-60 overflow-y-auto pr-2"></ul>
                     </div>
                 </div>
-                <!-- Manajemen Pengguna -->
                 <div class="mt-8 bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md">
                     <h3 class="text-xl font-bold mb-4">Manajemen Pengguna</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -297,6 +274,7 @@
                                     <select id="rolePengguna" required class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg p-2 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none">
                                         <option value="Admin">Admin</option>
                                         <option value="Auditor">Auditor</option>
+                                        <option value="User">User</option>
                                     </select>
                                 </div>
                                 <button type="submit" class="w-full bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center gap-2">
@@ -306,7 +284,7 @@
                         </div>
                         <div>
                             <h4 class="text-lg font-semibold mb-3">Daftar Pengguna</h4>
-                            <ul id="listPengguna" class="space-y-2 max-h-60 overflow-y-auto"></ul>
+                            <ul id="listPengguna" class="space-y-2 max-h-60 overflow-y-auto pr-2"></ul>
                         </div>
                     </div>
                 </div>
@@ -314,50 +292,73 @@
         </main>
     </div>
 
-    <!-- Modal for details and confirmation -->
     <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 hidden z-50">
-        <div id="modalContent" class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-lg p-6 transform transition-all scale-95 opacity-0">
-             <!-- Modal content will be injected here -->
-        </div>
+        <div id="modalContent" class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-lg p-6 transform transition-all scale-95 opacity-0"></div>
     </div>
     
-    <!-- Toast Notification -->
     <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-3 px-5 rounded-lg shadow-xl translate-y-20 opacity-0 transition-all duration-300">
         <p id="toastMessage"></p>
     </div>
 
-    <!-- Firebase SDK -->
     <script type="module">
-        // Import Firebase modules
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, addDoc, doc, deleteDoc, setLogLevel, getDocs, query, where, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, addDoc, doc, deleteDoc, getDocs, query, where, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // --- DOM ELEMENTS ---
-        const loginScreen = document.getElementById('login-screen');
-        const loginForm = document.getElementById('login-form');
-        const loginError = document.getElementById('login-error');
-        const appContainer = document.getElementById('app-container');
-        const logoutBtn = document.getElementById('logoutBtn');
+        const DOM = {
+            loadingOverlay: document.getElementById('loading-overlay'),
+            loadingText: document.getElementById('loading-text'),
+            loginScreen: document.getElementById('login-screen'),
+            loginForm: document.getElementById('login-form'),
+            loginError: document.getElementById('login-error'),
+            appContainer: document.getElementById('app-container'),
+            logoutBtn: document.getElementById('logoutBtn'),
+            loggedInUserDisplay: document.getElementById('loggedInUserDisplay'),
+            navAudit: document.getElementById('nav-audit'),
+            navPengaturan: document.getElementById('nav-pengaturan'),
+            totalKaryawan: document.getElementById('totalKaryawan'),
+            totalWorkshop: document.getElementById('totalWorkshop'),
+            totalAudit: document.getElementById('totalAudit'),
+            topEmployeesList: document.getElementById('topEmployeesList'),
+            topWorkshopsList: document.getElementById('topWorkshopsList'),
+            leaderboardChartCtx: document.getElementById('leaderboardChart').getContext('2d'),
+            auditForm: document.getElementById('auditForm'),
+            auditKaryawan: document.getElementById('auditKaryawan'),
+            auditWorkshop: document.getElementById('auditWorkshop'),
+            auditCriteriaContainer: document.getElementById('auditCriteriaContainer'),
+            laporanTableBody: document.getElementById('laporanTableBody'),
+            exportPdfBtn: document.getElementById('exportPdfBtn'),
+            exportExcelBtn: document.getElementById('exportExcelBtn'),
+            formKaryawan: document.getElementById('formKaryawan'),
+            listKaryawan: document.getElementById('listKaryawan'),
+            formWorkshop: document.getElementById('formWorkshop'),
+            listWorkshop: document.getElementById('listWorkshop'),
+            formPengguna: document.getElementById('formPengguna'),
+            listPengguna: document.getElementById('listPengguna'),
+            modal: document.getElementById('modal'),
+            modalContent: document.getElementById('modalContent'),
+            toast: document.getElementById('toast'),
+            toastMessage: document.getElementById('toastMessage'),
+        };
 
-        // --- CONFIGURATION & INITIALIZATION ---
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { apiKey: "YOUR_API_KEY", authDomain: "YOUR_AUTH_DOMAIN", projectId: "YOUR_PROJECT_ID" };
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
         const appId = typeof __app_id !== 'undefined' ? __app_id : '5r-app-default';
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        // setLogLevel('debug');
 
-        // Global state
-        let userId = null;
-        let loggedInUserRole = null;
-        let appUsers = [];
-        let employees = [];
-        let workshops = [];
-        let audits = [];
-        let leaderboardChart = null;
+        let state = {
+            userId: null,
+            loggedInUsername: null,
+            loggedInUserRole: null,
+            appUsers: [],
+            employees: [],
+            workshops: [],
+            audits: [],
+            leaderboardChart: null,
+        };
 
         const AUDIT_CATEGORIES = [
             { id: 'ringkas', name: '1R - Ringkas (Seiri)', description: 'Memilah barang yang perlu dan tidak perlu.' },
@@ -367,349 +368,302 @@
             { id: 'rajin', name: '5R - Rajin (Shitsuke)', description: 'Menjadikan 5R sebagai kebiasaan.' },
         ];
         
-        // --- LOGIN & AUTHENTICATION FLOW ---
-        
-        function handleAuthentication() {
+        const handleAuthentication = () => {
              onAuthStateChanged(auth, async (user) => {
                 if (user) {
-                    userId = user.uid;
-                    document.getElementById('userIdDisplay').textContent = userId;
+                    state.userId = user.uid;
                     await initializeLoginScreenData();
                 } else {
                     try {
-                        if (initialAuthToken) {
-                            await signInWithCustomToken(auth, initialAuthToken);
-                        } else {
-                            await signInAnonymously(auth);
-                        }
+                        initialAuthToken ? await signInWithCustomToken(auth, initialAuthToken) : await signInAnonymously(auth);
                     } catch (error) {
                         console.error("Firebase Authentication failed:", error);
-                        loginError.textContent = "Gagal mengautentikasi dengan server.";
-                        loginError.classList.remove('hidden');
+                        DOM.loadingText.textContent = "Gagal Mengautentikasi";
+                        DOM.loginError.textContent = "Gagal mengautentikasi dengan server.";
+                        DOM.loginError.classList.remove('hidden');
                     }
                 }
             });
-        }
+        };
 
-        async function initializeLoginScreenData() {
-            const publicDataPath = `artifacts/${appId}/public/data`;
-            const usersCollection = collection(db, `${publicDataPath}/users`);
-            
+        const initializeLoginScreenData = async () => {
+            const usersCollection = collection(db, `artifacts/${appId}/public/data/users`);
             try {
                 const q = query(usersCollection, where("username", "==", "admin"));
                 const querySnapshot = await getDocs(q);
                 if (querySnapshot.empty) {
-                    console.log("Default admin user not found. Creating one...");
                     await addDoc(usersCollection, { username: "admin", password: "admin", role: "Admin" });
                 }
-
                 const usersSnapshot = await getDocs(usersCollection);
-                appUsers = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                console.log("App users list fetched for login:", appUsers);
-
+                state.appUsers = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                
+                DOM.loadingOverlay.classList.add('hidden');
+                DOM.loginScreen.classList.remove('hidden');
             } catch (error) {
-                console.error("Error initializing login screen data:", error);
-                loginError.textContent = "Gagal memuat data pengguna. Periksa izin database.";
-                loginError.classList.remove('hidden');
+                console.error("Firestore connection failed:", error);
+                DOM.loadingOverlay.classList.add('hidden');
+                DOM.loginScreen.classList.remove('hidden');
+                DOM.loginError.textContent = "Gagal terhubung ke database. Periksa koneksi internet dan muat ulang.";
+                DOM.loginError.classList.remove('hidden');
+                DOM.loginForm.querySelector('button[type="submit"]').disabled = true;
+                DOM.loginForm.querySelector('button[type="submit"]').classList.add('opacity-50', 'cursor-not-allowed');
             }
-        }
+        };
 
-        loginForm.addEventListener('submit', (e) => {
+        const login = (e) => {
             e.preventDefault();
-            const username = e.target.username.value;
-            const password = e.target.password.value;
-
-            const foundUser = appUsers.find(u => u.username === username && u.password === password);
+            const username = DOM.loginForm.username.value;
+            const password = DOM.loginForm.password.value;
+            const foundUser = state.appUsers.find(u => u.username === username && u.password === password);
 
             if (foundUser) {
-                loggedInUserRole = foundUser.role;
-                loginScreen.classList.add('hidden');
-                appContainer.classList.remove('hidden');
+                state.loggedInUsername = foundUser.username;
+                state.loggedInUserRole = foundUser.role;
+                DOM.loginScreen.classList.add('hidden');
+                DOM.appContainer.classList.remove('hidden');
                 initializeAppState();
             } else {
-                loginError.textContent = 'Username atau password salah.';
-                loginError.classList.remove('hidden');
+                DOM.loginError.textContent = 'Username atau password salah.';
+                DOM.loginError.classList.remove('hidden');
             }
-        });
+        };
 
-        logoutBtn.addEventListener('click', () => {
-            loggedInUserRole = null;
-            appContainer.classList.add('hidden');
-            loginScreen.classList.remove('hidden');
-            loginForm.reset();
-            loginError.classList.add('hidden');
-        });
+        const logout = () => {
+            state.loggedInUsername = null;
+            state.loggedInUserRole = null;
+            DOM.appContainer.classList.add('hidden');
+            DOM.loginScreen.classList.remove('hidden');
+            DOM.loginForm.reset();
+            DOM.loginError.classList.add('hidden');
+        };
 
-        // --- MAIN APP LOGIC (POST-LOGIN) ---
-        function initializeAppState() {
-            if (!userId) {
-                console.error("Cannot initialize app state without a user ID.");
-                return;
-            };
+        const initializeAppState = () => {
+            if (!state.userId) return;
+            DOM.loggedInUserDisplay.textContent = state.loggedInUsername;
+
+            DOM.navPengaturan.style.display = state.loggedInUserRole === 'Admin' ? 'flex' : 'none';
+            DOM.navAudit.style.display = state.loggedInUserRole === 'User' ? 'none' : 'flex';
             
-            const pengaturanNav = document.getElementById('nav-pengaturan');
-            if (loggedInUserRole === 'Admin') {
-                pengaturanNav.style.display = 'flex';
-            } else {
-                pengaturanNav.style.display = 'none';
-            }
-
             setupEventListeners();
             fetchData();
             renderAuditCriteria();
             showPage('dashboard');
-        }
+        };
 
-        // --- DATA FETCHING (REAL-TIME) ---
-        function fetchData() {
-            const publicDataPath = `artifacts/${appId}/public/data`;
-
-             onSnapshot(collection(db, `${publicDataPath}/users`), (snapshot) => {
-                appUsers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderUserList();
+        const fetchData = () => {
+            const collections = {
+                users: 'pengguna',
+                employees: 'karyawan',
+                workshops: 'workshop',
+                audits: 'audit'
+            };
+            Object.keys(collections).forEach(key => {
+                onSnapshot(collection(db, `artifacts/${appId}/public/data/${key}`), (snapshot) => {
+                    state[key] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    updateUI(key);
+                }, (error) => {
+                    console.error(`Error fetching ${key}:`, error);
+                    showToast(`Gagal memuat data ${collections[key]}.`, "error");
+                });
             });
+        };
+        
+        const updateUI = (collectionKey) => {
+            switch(collectionKey) {
+                case 'users': renderUserList(); break;
+                case 'employees': 
+                    renderEmployeeList();
+                    renderEmployeeDropdown();
+                    updateDashboardCards();
+                    calculateAndRenderEmployeeLeaderboard(); 
+                    break;
+                case 'workshops': 
+                    renderWorkshopList();
+                    renderWorkshopDropdown();
+                    updateDashboardCards();
+                    calculateAndRenderWorkshopLeaderboard();
+                    break;
+                case 'audits':
+                    renderLaporanTable();
+                    updateDashboardCards();
+                    calculateAndRenderEmployeeLeaderboard(); 
+                    calculateAndRenderWorkshopLeaderboard();
+                    break;
+            }
+        };
 
-            onSnapshot(collection(db, `${publicDataPath}/employees`), (snapshot) => {
-                employees = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderEmployeeList();
-                renderEmployeeDropdown();
-                updateDashboardCards();
-                calculateAndRenderEmployeeLeaderboard();
-            });
-
-            onSnapshot(collection(db, `${publicDataPath}/workshops`), (snapshot) => {
-                workshops = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderWorkshopList();
-                renderWorkshopDropdown();
-                updateDashboardCards();
-                calculateAndRenderWorkshopLeaderboard();
-            });
-            
-            onSnapshot(collection(db, `${publicDataPath}/audits`), (snapshot) => {
-                audits = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderLaporanTable();
-                updateDashboardCards();
-                calculateAndRenderEmployeeLeaderboard();
-                calculateAndRenderWorkshopLeaderboard();
-            });
-        }
-
-        // --- UI RENDERING ---
-
-        function renderUserList() {
-            const list = document.getElementById('listPengguna');
-            list.innerHTML = appUsers.map(user => {
-                let actionButtons = `<button data-id="${user.id}" class="edit-pengguna text-sky-500 hover:text-sky-700 p-1"><i data-lucide="edit" class="w-4 h-4"></i></button>`;
-                if (user.username !== 'admin') {
-                    actionButtons += `<button data-id="${user.id}" class="delete-pengguna text-red-500 hover:text-red-700 p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button>`;
-                }
-
-                return `
-                    <li class="flex justify-between items-center p-3 bg-slate-100 dark:bg-slate-700/50 rounded-lg">
-                        <div>
-                            <p class="font-medium">${user.username}</p>
-                            <p class="text-xs text-slate-500 dark:text-slate-400">Bagian: ${user.role}</p>
-                        </div>
-                        <div class="flex gap-2">
-                            ${actionButtons}
-                        </div>
-                    </li>
+        const renderUserList = () => {
+            DOM.listPengguna.innerHTML = state.appUsers.map(user => {
+                const isAdmin = user.username === 'admin';
+                const actionButtons = `
+                    <button data-id="${user.id}" class="edit-pengguna text-sky-500 hover:text-sky-700 p-1"><i data-lucide="edit" class="w-4 h-4"></i></button>
+                    ${!isAdmin ? `<button data-id="${user.id}" class="delete-pengguna text-red-500 hover:text-red-700 p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button>` : ''}
                 `;
+                return `<li class="flex justify-between items-center p-3 bg-slate-100 dark:bg-slate-700/50 rounded-lg">
+                    <div>
+                        <p class="font-medium">${user.username}</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Bagian: ${user.role}</p>
+                    </div>
+                    <div class="flex gap-2">${actionButtons}</div>
+                </li>`;
             }).join('');
             lucide.createIcons();
-        }
+        };
 
-        function renderEmployeeList() {
-            const list = document.getElementById('listKaryawan');
-            list.innerHTML = employees.map(emp => `
+        const renderEmployeeList = () => {
+            DOM.listKaryawan.innerHTML = state.employees.map(emp => `
                 <li class="flex justify-between items-center p-3 bg-slate-100 dark:bg-slate-700/50 rounded-lg">
                     <div>
                         <p class="font-medium">${emp.name}</p>
                         <p class="text-xs text-slate-500 dark:text-slate-400">NIK: ${emp.nik || 'N/A'}</p>
                     </div>
                     <button data-id="${emp.id}" class="delete-karyawan text-red-500 hover:text-red-700 p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                </li>
-            `).join('');
+                </li>`).join('');
             lucide.createIcons();
-        }
+        };
 
-        function renderWorkshopList() {
-            const list = document.getElementById('listWorkshop');
-            list.innerHTML = workshops.map(ws => `
-                <li class="flex justify-between items-center p-2 bg-slate-100 dark:bg-slate-700/50 rounded-lg">
+        const renderWorkshopList = () => {
+            DOM.listWorkshop.innerHTML = state.workshops.map(ws => `
+                <li class="flex justify-between items-center p-3 bg-slate-100 dark:bg-slate-700/50 rounded-lg">
                     <span>${ws.name}</span>
-                    <button data-id="${ws.id}" class="delete-workshop text-red-500 hover:text-red-700"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                </li>
-            `).join('');
+                    <button data-id="${ws.id}" class="delete-workshop text-red-500 hover:text-red-700 p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                </li>`).join('');
             lucide.createIcons();
-        }
-        
-        function renderEmployeeDropdown() {
-            const select = document.getElementById('auditKaryawan');
-            select.innerHTML = '<option value="" disabled selected>Pilih Karyawan</option>' + employees.map(emp => `<option value="${emp.id}">${emp.name} (${emp.nik || 'N/A'})</option>`).join('');
-        }
-        
-        function renderWorkshopDropdown() {
-            const select = document.getElementById('auditWorkshop');
-            select.innerHTML = '<option value="" disabled selected>Pilih Workshop</option>' + workshops.map(ws => `<option value="${ws.id}">${ws.name}</option>`).join('');
-        }
+        };
 
-        function renderAuditCriteria() {
-            const container = document.getElementById('auditCriteriaContainer');
-            container.innerHTML = AUDIT_CATEGORIES.map(cat => `
+        const renderEmployeeDropdown = () => {
+            DOM.auditKaryawan.innerHTML = '<option value="" disabled selected>Pilih Karyawan</option>' + state.employees.map(emp => `<option value="${emp.id}">${emp.name} (${emp.nik || 'N/A'})</option>`).join('');
+        };
+
+        const renderWorkshopDropdown = () => {
+            DOM.auditWorkshop.innerHTML = '<option value="" disabled selected>Pilih Workshop</option>' + state.workshops.map(ws => `<option value="${ws.id}">${ws.name}</option>`).join('');
+        };
+
+        const renderAuditCriteria = () => {
+            DOM.auditCriteriaContainer.innerHTML = AUDIT_CATEGORIES.map(cat => `
                 <div class="border-t dark:border-slate-700 pt-6">
                     <h4 class="text-lg font-bold">${cat.name}</h4>
                     <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">${cat.description}</p>
-                    <div class="flex items-center justify-center space-x-2 sm:space-x-4" data-category="${cat.id}">
+                    <div class="flex items-center justify-center space-x-2 sm:space-x-4">
                         ${[1,2,3,4,5].map(score => `
                             <label class="flex flex-col items-center cursor-pointer">
                                 <input type="radio" name="${cat.id}" value="${score}" class="peer sr-only" required>
                                 <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-lg font-bold border-2 border-slate-300 dark:border-slate-600 peer-checked:bg-sky-500 peer-checked:text-white peer-checked:border-sky-500 transition-all">${score}</div>
                                 <span class="text-xs mt-1 text-slate-500">${score === 1 ? 'Buruk' : score === 5 ? 'Baik' : ''}</span>
-                            </label>
-                        `).join('')}
+                            </label>`).join('')}
                     </div>
-                </div>
-            `).join('');
-        }
+                </div>`).join('');
+        };
 
-        function updateDashboardCards() {
-            document.getElementById('totalKaryawan').textContent = employees.length;
-            document.getElementById('totalWorkshop').textContent = workshops.length;
-            document.getElementById('totalAudit').textContent = audits.length;
-        }
-        
-        function renderLaporanTable() {
-            const body = document.getElementById('laporanTableBody');
-            if (audits.length === 0) {
-                body.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-slate-500">Belum ada data audit.</td></tr>`;
+        const updateDashboardCards = () => {
+            DOM.totalKaryawan.textContent = state.employees.length;
+            DOM.totalWorkshop.textContent = state.workshops.length;
+            DOM.totalAudit.textContent = state.audits.length;
+        };
+
+        const renderLaporanTable = () => {
+            if (state.audits.length === 0) {
+                DOM.laporanTableBody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-slate-500">Belum ada data audit.</td></tr>`;
                 return;
             }
-            body.innerHTML = audits
-                .sort((a, b) => b.timestamp.seconds - a.timestamp.seconds) // Sort newest first
+            DOM.laporanTableBody.innerHTML = [...state.audits]
+                .sort((a, b) => b.timestamp.seconds - a.timestamp.seconds)
                 .map(audit => {
-                    const employee = employees.find(e => e.id === audit.employeeId);
-                    const workshop = workshops.find(w => w.id === audit.workshopId);
+                    const employee = state.employees.find(e => e.id === audit.employeeId);
+                    const workshop = state.workshops.find(w => w.id === audit.workshopId);
                     return `
                         <tr class="bg-white dark:bg-slate-800 border-b dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600/50">
                             <td class="px-6 py-4 font-medium">${new Date(audit.timestamp.seconds * 1000).toLocaleDateString('id-ID')}</td>
                             <td class="px-6 py-4">${employee ? `${employee.name} (${employee.nik || 'N/A'})` : 'N/A'}</td>
                             <td class="px-6 py-4">${workshop ? workshop.name : 'N/A'}</td>
                             <td class="px-6 py-4 font-bold text-sky-500">${audit.totalScore}</td>
-                            <td class="px-6 py-4">
+                            <td class="px-6 py-4 text-center">
                                 <button class="view-detail-btn text-sky-500 hover:underline" data-id="${audit.id}">Lihat</button>
                             </td>
-                        </tr>
-                    `;
+                        </tr>`;
             }).join('');
-        }
+        };
         
-        function calculateAndRenderEmployeeLeaderboard() {
-            if (audits.length === 0 || employees.length === 0) {
+        const calculateAndRenderLeaderboards = () => {
+            if (state.audits.length === 0) {
                 renderEmptyLeaderboard();
-                return;
-            }
-
-            const scores = {};
-            audits.forEach(audit => {
-                if (!scores[audit.employeeId]) {
-                    scores[audit.employeeId] = { total: 0, count: 0 };
-                }
-                scores[audit.employeeId].total += audit.totalScore;
-                scores[audit.employeeId].count++;
-            });
-
-            const leaderboardData = Object.keys(scores).map(employeeId => {
-                const employee = employees.find(e => e.id === employeeId);
-                return {
-                    name: employee ? employee.name : 'Unknown',
-                    avgScore: scores[employeeId].total / scores[employeeId].count
-                };
-            }).sort((a, b) => b.avgScore - a.avgScore);
-            
-            renderTopPerformers(leaderboardData.slice(0, 3), 'topEmployeesList');
-            renderLeaderboardChart(leaderboardData.slice(0, 10));
-        }
-
-        function calculateAndRenderWorkshopLeaderboard() {
-            if (audits.length === 0 || workshops.length === 0) {
                 renderEmptyTopPerformers('topWorkshopsList', 'workshop');
                 return;
             }
 
-            const scores = {};
-            audits.forEach(audit => {
-                if (!scores[audit.workshopId]) {
-                    scores[audit.workshopId] = { total: 0, count: 0 };
-                }
-                scores[audit.workshopId].total += audit.totalScore;
-                scores[audit.workshopId].count++;
-            });
+            const calculateAverages = (key) => {
+                const scores = {};
+                state.audits.forEach(audit => {
+                    const id = audit[key];
+                    if (!scores[id]) scores[id] = { total: 0, count: 0 };
+                    scores[id].total += audit.totalScore;
+                    scores[id].count++;
+                });
+                const sourceData = key === 'employeeId' ? state.employees : state.workshops;
+                return Object.keys(scores).map(id => {
+                    const item = sourceData.find(d => d.id === id);
+                    return {
+                        name: item ? item.name : 'Data Dihapus',
+                        avgScore: scores[id].total / scores[id].count
+                    };
+                }).sort((a, b) => b.avgScore - a.avgScore);
+            };
 
-            const leaderboardData = Object.keys(scores).map(workshopId => {
-                const workshop = workshops.find(w => w.id === workshopId);
-                return {
-                    name: workshop ? workshop.name : 'Unknown',
-                    avgScore: scores[workshopId].total / scores[workshopId].count
-                };
-            }).sort((a, b) => b.avgScore - a.avgScore);
-            
-            renderTopPerformers(leaderboardData.slice(0, 3), 'topWorkshopsList');
-        }
+            const employeeLeaderboard = calculateAverages('employeeId');
+            const workshopLeaderboard = calculateAverages('workshopId');
 
-        function renderTopPerformers(data, listId) {
-            const listElement = document.getElementById(listId);
-            const trophyColors = ['text-amber-400', 'text-slate-400', 'text-amber-600'];
-            
+            renderTopPerformers(employeeLeaderboard.slice(0, 3), 'topEmployeesList', 'karyawan');
+            renderTopPerformers(workshopLeaderboard.slice(0, 3), 'topWorkshopsList', 'workshop');
+            renderLeaderboardChart(employeeLeaderboard.slice(0, 10));
+        };
+
+        const calculateAndRenderEmployeeLeaderboard = calculateAndRenderLeaderboards;
+        const calculateAndRenderWorkshopLeaderboard = calculateAndRenderLeaderboards;
+
+        const renderTopPerformers = (data, elementId, type) => {
+            const listElement = document.getElementById(elementId);
             if(data.length === 0) {
-                renderEmptyTopPerformers(listId, listId === 'topEmployeesList' ? 'karyawan' : 'workshop');
+                renderEmptyTopPerformers(elementId, type);
                 return;
             }
-
             listElement.innerHTML = data.map((item, index) => `
                 <li class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg">
                     <div class="flex items-center gap-4">
-                        <i data-lucide="trophy" class="${trophyColors[index] || 'text-slate-500'}"></i>
+                        <span class="text-lg ${index === 0 ? 'text-amber-400' : index === 1 ? 'text-slate-400' : 'text-amber-600'}">🏆</span>
                         <div>
                             <p class="font-semibold">${item.name}</p>
                             <p class="text-sm text-slate-500 dark:text-slate-400">Skor: ${item.avgScore.toFixed(2)}</p>
                         </div>
                     </div>
                     <div class="text-lg font-bold text-slate-400 dark:text-slate-500">#${index + 1}</div>
-                </li>
-            `).join('');
-            lucide.createIcons();
-        }
+                </li>`).join('');
+        };
         
-        function renderEmptyTopPerformers(listId, type) {
-             const listElement = document.getElementById(listId);
-             listElement.innerHTML = `<li class="text-center text-slate-500 py-4">Belum ada data ${type}.</li>`;
-        }
+        const renderEmptyTopPerformers = (elementId, type) => {
+             document.getElementById(elementId).innerHTML = `<li class="text-center text-slate-500 py-4">Belum ada data ${type}.</li>`;
+        };
         
-        function renderEmptyLeaderboard() {
-            if(leaderboardChart) leaderboardChart.destroy();
-            const ctx = document.getElementById('leaderboardChart').getContext('2d');
+        const renderEmptyLeaderboard = () => {
+            if(state.leaderboardChart) state.leaderboardChart.destroy();
+            const ctx = DOM.leaderboardChartCtx;
             ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
             ctx.font = "16px Inter";
             ctx.fillStyle = document.body.classList.contains('dark') ? '#94a3b8' : '#64748b';
             ctx.textAlign = "center";
-            ctx.fillText("Data tidak cukup untuk menampilkan klasemen.", ctx.canvas.width / 2, ctx.canvas.height / 2);
+            ctx.fillText("Data audit tidak cukup untuk menampilkan klasemen.", ctx.canvas.width / 2, ctx.canvas.height / 2);
             renderEmptyTopPerformers('topEmployeesList', 'karyawan');
-        }
+        };
 
-        function renderLeaderboardChart(data) {
-            const ctx = document.getElementById('leaderboardChart').getContext('2d');
-            if (leaderboardChart) {
-                leaderboardChart.destroy();
-            }
-            leaderboardChart = new Chart(ctx, {
+        const renderLeaderboardChart = (data) => {
+            if (state.leaderboardChart) state.leaderboardChart.destroy();
+            state.leaderboardChart = new Chart(DOM.leaderboardChartCtx, {
                 type: 'bar',
                 data: {
                     labels: data.map(d => d.name),
                     datasets: [{
                         label: 'Skor Rata-rata',
                         data: data.map(d => d.avgScore.toFixed(2)),
-                        backgroundColor: 'rgba(14, 165, 233, 0.6)',
+                        backgroundColor: 'rgba(56, 189, 248, 0.6)',
                         borderColor: 'rgba(14, 165, 233, 1)',
                         borderWidth: 1,
                         borderRadius: 5,
@@ -719,162 +673,117 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 25, // Max score is 5 * 5 categories
-                            grid: { color: document.body.classList.contains('dark') ? '#334155' : '#e2e8f0' },
-                            ticks: { color: document.body.classList.contains('dark') ? '#94a3b8' : '#64748b' }
-                        },
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: document.body.classList.contains('dark') ? '#94a3b8' : '#64748b' }
-                        }
+                        y: { beginAtZero: true, max: 25, grid: { color: document.body.classList.contains('dark') ? '#334155' : '#e2e8f0' }, ticks: { color: document.body.classList.contains('dark') ? '#94a3b8' : '#64748b' } },
+                        x: { grid: { display: false }, ticks: { color: document.body.classList.contains('dark') ? '#94a3b8' : '#64748b' } }
                     },
-                    plugins: {
-                        legend: { display: false }
-                    }
+                    plugins: { legend: { display: false }, tooltip: { displayColors: false } }
                 }
             });
-        }
+        };
 
-        // --- EVENT LISTENERS & HANDLERS ---
-        function setupEventListeners() {
-            document.querySelectorAll('.nav-link').forEach(link => {
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    showPage(e.currentTarget.dataset.page);
-                });
-            });
-
-            document.getElementById('formKaryawan').addEventListener('submit', handleAddKaryawan);
-            document.getElementById('formWorkshop').addEventListener('submit', handleAddWorkshop);
-            document.getElementById('formPengguna').addEventListener('submit', handleAddPengguna);
-            
-            document.getElementById('listKaryawan').addEventListener('click', handleDeleteKaryawan);
-            document.getElementById('listWorkshop').addEventListener('click', handleDeleteWorkshop);
-            document.getElementById('listPengguna').addEventListener('click', handleUserActions);
-
-            document.getElementById('auditForm').addEventListener('submit', handleSaveAudit);
-            
-            document.getElementById('exportPdfBtn').addEventListener('click', exportToPDF);
-            document.getElementById('exportExcelBtn').addEventListener('click', exportToExcel);
-
-            document.getElementById('laporanTableBody').addEventListener('click', handleViewDetail);
-            document.getElementById('modal').addEventListener('click', (e) => {
-                if(e.target.id === 'modal' || e.target.closest('.modal-close')) closeModal();
-            });
-        }
+        const setupEventListeners = () => {
+            document.querySelectorAll('.nav-link').forEach(link => link.addEventListener('click', (e) => showPage(e.currentTarget.dataset.page)));
+            DOM.loginForm.addEventListener('submit', login);
+            DOM.logoutBtn.addEventListener('click', logout);
+            DOM.formKaryawan.addEventListener('submit', handleAddKaryawan);
+            DOM.formWorkshop.addEventListener('submit', handleAddWorkshop);
+            DOM.formPengguna.addEventListener('submit', handleAddPengguna);
+            DOM.listKaryawan.addEventListener('click', handleDeleteKaryawan);
+            DOM.listWorkshop.addEventListener('click', handleDeleteWorkshop);
+            DOM.listPengguna.addEventListener('click', handleUserActions);
+            DOM.auditForm.addEventListener('submit', handleSaveAudit);
+            DOM.exportPdfBtn.addEventListener('click', exportToPDF);
+            DOM.exportExcelBtn.addEventListener('click', exportToExcel);
+            DOM.laporanTableBody.addEventListener('click', handleViewDetail);
+            DOM.modal.addEventListener('click', (e) => { if(e.target.id === 'modal' || e.target.closest('.modal-close')) closeModal(); });
+        };
         
-        function handleUserActions(e) {
+        const handleUserActions = (e) => {
             const deleteButton = e.target.closest('.delete-pengguna');
             const editButton = e.target.closest('.edit-pengguna');
-
             if (deleteButton) {
-                const docId = deleteButton.dataset.id;
-                const user = appUsers.find(u => u.id === docId);
+                const user = state.appUsers.find(u => u.id === deleteButton.dataset.id);
                 showConfirmationModal(`Yakin ingin menghapus pengguna "${user.username}"?`, () => {
-                     deleteDoc(doc(db, `artifacts/${appId}/public/data/users`, docId));
+                     deleteDoc(doc(db, `artifacts/${appId}/public/data/users`, user.id));
                      showToast('Pengguna berhasil dihapus.');
                 });
             }
+            if (editButton) showEditUserModal(editButton.dataset.id);
+        };
 
-            if (editButton) {
-                const docId = editButton.dataset.id;
-                showEditUserModal(docId);
-            }
-        }
-
-        function handleAddPengguna(e) {
-            e.preventDefault();
-            const form = e.target;
-            const username = form.usernamePengguna.value.trim();
-            const password = form.passwordPengguna.value.trim();
-            const role = form.rolePengguna.value;
-
-            if (username && password && role) {
-                if (appUsers.some(u => u.username === username)) {
-                    showToast('Username sudah ada.', 'error');
-                    return;
-                }
-                addDoc(collection(db, `artifacts/${appId}/public/data/users`), { username, password, role });
+        const handleAddEntity = async (form, collectionName, data, successMessage) => {
+            try {
+                await addDoc(collection(db, `artifacts/${appId}/public/data/${collectionName}`), data);
                 form.reset();
-                showToast('Pengguna berhasil ditambahkan.');
+                showToast(successMessage);
+            } catch (error) {
+                console.error(`Error adding to ${collectionName}:`, error);
+                showToast(`Gagal menambahkan data.`, 'error');
             }
-        }
-        
-        function handleAddKaryawan(e) {
-            e.preventDefault();
-            const nikInput = document.getElementById('nikKaryawan');
-            const nameInput = document.getElementById('namaKaryawan');
-            const nik = nikInput.value.trim();
-            const name = nameInput.value.trim();
+        };
 
-            if (name && nik) {
-                addDoc(collection(db, `artifacts/${appId}/public/data/employees`), { name, nik });
-                nikInput.value = '';
-                nameInput.value = '';
-                showToast('Karyawan berhasil ditambahkan.');
-            }
-        }
-
-        function handleAddWorkshop(e) {
+        const handleAddPengguna = (e) => {
             e.preventDefault();
-            const input = document.getElementById('namaWorkshop');
-            const name = input.value.trim();
-            if (name) {
-                addDoc(collection(db, `artifacts/${appId}/public/data/workshops`), { name });
-                input.value = '';
-                showToast('Workshop berhasil ditambahkan.');
+            const { usernamePengguna, passwordPengguna, rolePengguna } = DOM.formPengguna.elements;
+            if (state.appUsers.some(u => u.username === usernamePengguna.value.trim())) {
+                showToast('Username sudah ada.', 'error');
+                return;
             }
-        }
+            handleAddEntity(DOM.formPengguna, 'users', { username: usernamePengguna.value.trim(), password: passwordPengguna.value.trim(), role: rolePengguna.value }, 'Pengguna berhasil ditambahkan.');
+        };
         
-        function handleDeleteKaryawan(e) {
+        const handleAddKaryawan = (e) => {
+            e.preventDefault();
+            const { nikKaryawan, namaKaryawan } = DOM.formKaryawan.elements;
+            handleAddEntity(DOM.formKaryawan, 'employees', { name: namaKaryawan.value.trim(), nik: nikKaryawan.value.trim() }, 'Karyawan berhasil ditambahkan.');
+        };
+
+        const handleAddWorkshop = (e) => {
+            e.preventDefault();
+            const { namaWorkshop } = DOM.formWorkshop.elements;
+            handleAddEntity(DOM.formWorkshop, 'workshops', { name: namaWorkshop.value.trim() }, 'Workshop berhasil ditambahkan.');
+        };
+        
+        const handleDeleteKaryawan = (e) => {
             const button = e.target.closest('.delete-karyawan');
             if (button) {
-                const docId = button.dataset.id;
-                const employee = employees.find(e => e.id === docId);
-                showConfirmationModal(`Yakin ingin menghapus karyawan "${employee.name}" (NIK: ${employee.nik})?`, () => {
-                     deleteDoc(doc(db, `artifacts/${appId}/public/data/employees`, docId));
+                const employee = state.employees.find(emp => emp.id === button.dataset.id);
+                showConfirmationModal(`Yakin ingin menghapus karyawan "${employee.name}"?`, () => {
+                     deleteDoc(doc(db, `artifacts/${appId}/public/data/employees`, employee.id));
                      showToast('Karyawan berhasil dihapus.');
                 });
             }
-        }
+        };
         
-        function handleDeleteWorkshop(e) {
+        const handleDeleteWorkshop = (e) => {
             const button = e.target.closest('.delete-workshop');
             if (button) {
-                const docId = button.dataset.id;
-                const workshop = workshops.find(w => w.id === docId);
+                const workshop = state.workshops.find(ws => ws.id === button.dataset.id);
                 showConfirmationModal(`Yakin ingin menghapus workshop "${workshop.name}"?`, () => {
-                    deleteDoc(doc(db, `artifacts/${appId}/public/data/workshops`, docId));
+                    deleteDoc(doc(db, `artifacts/${appId}/public/data/workshops`, workshop.id));
                     showToast('Workshop berhasil dihapus.');
                 });
             }
-        }
+        };
 
-        function handleSaveAudit(e) {
+        const handleSaveAudit = (e) => {
             e.preventDefault();
-            const form = e.target;
-            const employeeId = form.querySelector('#auditKaryawan').value;
-            const workshopId = form.querySelector('#auditWorkshop').value;
-            
+            const employeeId = DOM.auditKaryawan.value;
+            const workshopId = DOM.auditWorkshop.value;
             if(!employeeId || !workshopId) {
                 showToast('Harap pilih karyawan dan workshop.', 'error');
                 return;
             }
-
             const scores = {};
             let totalScore = 0;
-            let allAnswered = true;
-            AUDIT_CATEGORIES.forEach(cat => {
-                const selected = form.querySelector(`input[name="${cat.id}"]:checked`);
+            const allAnswered = AUDIT_CATEGORIES.every(cat => {
+                const selected = DOM.auditForm.querySelector(`input[name="${cat.id}"]:checked`);
                 if(selected) {
-                    const score = parseInt(selected.value);
-                    scores[cat.id] = score;
-                    totalScore += score;
-                } else {
-                    allAnswered = false;
+                    scores[cat.id] = parseInt(selected.value);
+                    totalScore += scores[cat.id];
+                    return true;
                 }
+                return false;
             });
 
             if(!allAnswered) {
@@ -882,65 +791,42 @@
                 return;
             }
 
-            const auditData = {
-                employeeId,
-                workshopId,
-                scores,
-                totalScore,
-                timestamp: new Date()
-            };
+            handleAddEntity(DOM.auditForm, 'audits', { employeeId, workshopId, scores, totalScore, timestamp: new Date() }, 'Audit berhasil disimpan.')
+                .then(() => showPage('laporan'));
+        };
 
-            addDoc(collection(db, `artifacts/${appId}/public/data/audits`), auditData)
-                .then(() => {
-                    showToast('Audit berhasil disimpan.');
-                    form.reset();
-                    showPage('laporan');
-                })
-                .catch(err => {
-                    console.error("Error saving audit:", err);
-                    showToast('Gagal menyimpan audit.', 'error');
-                });
-        }
-
-        function handleViewDetail(e) {
+        const handleViewDetail = (e) => {
             const button = e.target.closest('.view-detail-btn');
             if (button) {
-                const auditId = button.dataset.id;
-                const audit = audits.find(a => a.id === auditId);
+                const audit = state.audits.find(a => a.id === button.dataset.id);
                 if (audit) {
-                    const employee = employees.find(e => e.id === audit.employeeId);
-                    const workshop = workshops.find(w => w.id === audit.workshopId);
+                    const employee = state.employees.find(e => e.id === audit.employeeId);
+                    const workshop = state.workshops.find(w => w.id === audit.workshopId);
                     
-                    const modalContent = document.getElementById('modalContent');
-                    modalContent.innerHTML = `
+                    DOM.modalContent.innerHTML = `
                         <div class="flex justify-between items-start">
                              <h3 class="text-2xl font-bold mb-4">Detail Audit</h3>
                              <button class="modal-close text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"><i data-lucide="x"></i></button>
                         </div>
                         <div class="space-y-4 text-sm">
-                            <p><strong>Tanggal:</strong> ${new Date(audit.timestamp.seconds * 1000).toLocaleString('id-ID')}</p>
+                            <p><strong>Tanggal:</strong> ${new Date(audit.timestamp.seconds * 1000).toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short' })}</p>
                             <p><strong>Karyawan:</strong> ${employee ? `${employee.name} (NIK: ${employee.nik || 'N/A'})` : 'N/A'}</p>
                             <p><strong>Workshop:</strong> ${workshop ? workshop.name : 'N/A'}</p>
                             <p class="text-lg"><strong>Total Skor:</strong> <span class="font-bold text-sky-500">${audit.totalScore}</span></p>
                             <div class="border-t dark:border-slate-700 pt-4 mt-4">
                                 <h4 class="font-bold mb-2">Rincian Skor:</h4>
                                 <ul class="list-disc list-inside space-y-1">
-                                    ${Object.entries(audit.scores).map(([key, value]) => {
-                                        const category = AUDIT_CATEGORIES.find(c => c.id === key);
-                                        return `<li><strong>${category.name}:</strong> ${value}</li>`;
-                                    }).join('')}
+                                    ${Object.entries(audit.scores).map(([key, value]) => `<li><strong>${AUDIT_CATEGORIES.find(c=>c.id===key)?.name || key}:</strong> ${value}</li>`).join('')}
                                 </ul>
                             </div>
-                        </div>
-                    `;
+                        </div>`;
                     openModal();
                 }
             }
-        }
+        };
 
-        // --- UTILITY FUNCTIONS ---
-        function showPage(pageId) {
-            if (pageId === 'pengaturan' && loggedInUserRole !== 'Admin') {
+        const showPage = (pageId) => {
+            if ((pageId === 'pengaturan' && state.loggedInUserRole !== 'Admin') || (pageId === 'audit' && state.loggedInUserRole === 'User')) {
                 showToast('Anda tidak memiliki akses ke halaman ini.', 'error');
                 return;
             }
@@ -949,74 +835,47 @@
 
             document.querySelectorAll('.nav-link').forEach(link => {
                 link.classList.remove('bg-sky-500', 'text-white');
-                if (link.dataset.page === pageId) {
-                    link.classList.add('bg-sky-500', 'text-white');
-                }
+                if (link.dataset.page === pageId) link.classList.add('bg-sky-500', 'text-white');
             });
-            if (pageId === 'dashboard') {
-                calculateAndRenderEmployeeLeaderboard();
-                calculateAndRenderWorkshopLeaderboard();
-            }
-        }
+            if (pageId === 'dashboard') calculateAndRenderLeaderboards();
+        };
         
-        function showToast(message, type = 'success') {
-            const toast = document.getElementById('toast');
-            const toastMessage = document.getElementById('toastMessage');
-            
-            toastMessage.textContent = message;
-            toast.classList.remove('bg-slate-900', 'bg-red-600');
-            toast.classList.add(type === 'success' ? 'bg-slate-900' : 'bg-red-600');
-            
+        const showToast = (message, type = 'success') => {
+            const toast = DOM.toast;
+            DOM.toastMessage.textContent = message;
+            toast.className = `fixed bottom-5 right-5 py-3 px-5 rounded-lg shadow-xl translate-y-20 opacity-0 transition-all duration-300 ${type === 'success' ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900' : type === 'error' ? 'bg-red-600 text-white' : 'bg-sky-500 text-white'}`;
             toast.classList.remove('translate-y-20', 'opacity-0');
-            setTimeout(() => {
-                toast.classList.add('translate-y-20', 'opacity-0');
-            }, 3000);
-        }
+            setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3000);
+        };
 
-        function openModal() {
-            const modal = document.getElementById('modal');
-            const modalContent = document.getElementById('modalContent');
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                modalContent.classList.remove('scale-95', 'opacity-0');
-            }, 10);
+        const openModal = () => {
+            DOM.modal.classList.remove('hidden');
+            setTimeout(() => DOM.modalContent.classList.remove('scale-95', 'opacity-0'), 10);
             lucide.createIcons();
-        }
+        };
 
-        function closeModal() {
-            const modal = document.getElementById('modal');
-            const modalContent = document.getElementById('modalContent');
-            modalContent.classList.add('scale-95', 'opacity-0');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-            }, 200);
-        }
+        const closeModal = () => {
+            DOM.modalContent.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => DOM.modal.classList.add('hidden'), 200);
+        };
 
-        function showConfirmationModal(message, onConfirm) {
-            const modalContent = document.getElementById('modalContent');
-            modalContent.innerHTML = `
+        const showConfirmationModal = (message, onConfirm) => {
+            DOM.modalContent.innerHTML = `
                 <h3 class="text-xl font-bold mb-4">Konfirmasi</h3>
                 <p class="text-slate-600 dark:text-slate-300 mb-6">${message}</p>
                 <div class="flex justify-end gap-3">
                     <button class="modal-close px-4 py-2 rounded-lg bg-slate-200 dark:bg-slate-600 hover:bg-slate-300 dark:hover:bg-slate-500">Batal</button>
                     <button id="confirmBtn" class="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600">Hapus</button>
-                </div>
-            `;
+                </div>`;
             openModal();
-            document.getElementById('confirmBtn').addEventListener('click', () => {
-                onConfirm();
-                closeModal();
-            });
-        }
+            document.getElementById('confirmBtn').addEventListener('click', () => { onConfirm(); closeModal(); });
+        };
 
-        function showEditUserModal(userId) {
-            const user = appUsers.find(u => u.id === userId);
+        const showEditUserModal = (userId) => {
+            const user = state.appUsers.find(u => u.id === userId);
             if (!user) return;
-
             const isAdmin = user.username === 'admin';
-
-            const modalContent = document.getElementById('modalContent');
-            modalContent.innerHTML = `
+            DOM.modalContent.innerHTML = `
                 <div class="flex justify-between items-start">
                     <h3 class="text-2xl font-bold mb-4">Edit Pengguna</h3>
                     <button class="modal-close text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"><i data-lucide="x"></i></button>
@@ -1035,44 +894,35 @@
                         <select id="editRole" required class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg p-2 ${isAdmin ? 'bg-slate-200 dark:bg-slate-600 cursor-not-allowed' : ''}" ${isAdmin ? 'disabled' : ''}>
                             <option value="Admin" ${user.role === 'Admin' ? 'selected' : ''}>Admin</option>
                             <option value="Auditor" ${user.role === 'Auditor' ? 'selected' : ''}>Auditor</option>
+                            <option value="User" ${user.role === 'User' ? 'selected' : ''}>User</option>
                         </select>
                     </div>
                     <div class="flex justify-end gap-3 pt-4">
                         <button type="button" class="modal-close px-4 py-2 rounded-lg bg-slate-200 dark:bg-slate-600 hover:bg-slate-300 dark:hover:bg-slate-500">Batal</button>
                         <button type="submit" class="px-4 py-2 rounded-lg bg-sky-500 text-white hover:bg-sky-600">Simpan Perubahan</button>
                     </div>
-                </form>
-            `;
+                </form>`;
             openModal();
-
             document.getElementById('editUserForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const form = e.target;
-                const docId = form.dataset.id;
-                const originalUser = appUsers.find(u => u.id === docId);
-
+                const originalUser = state.appUsers.find(u => u.id === form.dataset.id);
                 const updatedData = {};
-                
                 const newPassword = form.editPassword.value.trim();
-                if (newPassword) {
-                    updatedData.password = newPassword;
-                }
+                if (newPassword) updatedData.password = newPassword;
 
-                if (originalUser.username !== 'admin') {
+                if (!isAdmin) {
                     const newUsername = form.editUsername.value.trim();
-                    const newRole = form.editRole.value;
-                    
-                    if (newUsername !== originalUser.username && appUsers.some(u => u.username === newUsername)) {
+                    if (newUsername !== originalUser.username && state.appUsers.some(u => u.username === newUsername)) {
                         showToast('Username baru sudah digunakan.', 'error');
                         return;
                     }
                     updatedData.username = newUsername;
-                    updatedData.role = newRole;
+                    updatedData.role = form.editRole.value;
                 }
                 
                 if (Object.keys(updatedData).length > 0) {
-                    const userDocRef = doc(db, `artifacts/${appId}/public/data/users`, docId);
-                    await updateDoc(userDocRef, updatedData);
+                    await updateDoc(doc(db, `artifacts/${appId}/public/data/users`, form.dataset.id), updatedData);
                     showToast('Data pengguna berhasil diperbarui.');
                     closeModal();
                 } else {
@@ -1080,14 +930,10 @@
                     closeModal();
                 }
             });
-        }
+        };
         
-        // --- EXPORT FUNCTIONS ---
-        function exportToPDF() {
-            if (audits.length === 0) {
-                showToast('Tidak ada data untuk diekspor.', 'error');
-                return;
-            }
+        const exportToPDF = () => {
+            if (state.audits.length === 0) return showToast('Tidak ada data untuk diekspor.', 'error');
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             
@@ -1097,61 +943,35 @@
             doc.setTextColor(100);
             doc.text(`Tanggal Ekspor: ${new Date().toLocaleDateString('id-ID')}`, 14, 30);
 
-            const tableData = audits.map(audit => {
-                const employee = employees.find(e => e.id === audit.employeeId);
-                const workshop = workshops.find(w => w.id === audit.workshopId);
-                return [
-                    new Date(audit.timestamp.seconds * 1000).toLocaleDateString('id-ID'),
-                    employee ? employee.nik : 'N/A',
-                    employee ? employee.name : 'N/A',
-                    workshop ? workshop.name : 'N/A',
-                    audit.totalScore
-                ];
+            const tableData = state.audits.map(audit => {
+                const employee = state.employees.find(e => e.id === audit.employeeId);
+                const workshop = state.workshops.find(w => w.id === audit.workshopId);
+                return [ new Date(audit.timestamp.seconds * 1000).toLocaleDateString('id-ID'), employee ? employee.nik : 'N/A', employee ? employee.name : 'N/A', workshop ? workshop.name : 'N/A', audit.totalScore ];
             });
 
-            doc.autoTable({
-                startY: 35,
-                head: [['Tanggal', 'NIK', 'Karyawan', 'Workshop', 'Total Skor']],
-                body: tableData,
-                theme: 'grid',
-                headStyles: { fillColor: [14, 165, 233] }
-            });
-
+            doc.autoTable({ startY: 35, head: [['Tanggal', 'NIK', 'Karyawan', 'Workshop', 'Total Skor']], body: tableData, theme: 'grid', headStyles: { fillColor: [14, 165, 233] } });
             doc.save('laporan-audit-5r.pdf');
             showToast('Laporan PDF berhasil dibuat.');
-        }
+        };
 
-        function exportToExcel() {
-            if (audits.length === 0) {
-                showToast('Tidak ada data untuk diekspor.', 'error');
-                return;
-            }
-            const dataToExport = audits.map(audit => {
-                const employee = employees.find(e => e.id === audit.employeeId);
-                const workshop = workshops.find(w => w.id === audit.workshopId);
+        const exportToExcel = () => {
+            if (state.audits.length === 0) return showToast('Tidak ada data untuk diekspor.', 'error');
+            const dataToExport = state.audits.map(audit => {
+                const employee = state.employees.find(e => e.id === audit.employeeId);
+                const workshop = state.workshops.find(w => w.id === audit.workshopId);
                 return {
-                    'Tanggal': new Date(audit.timestamp.seconds * 1000).toLocaleDateString('id-ID'),
-                    'NIK': employee ? employee.nik : 'N/A',
-                    'Karyawan': employee ? employee.name : 'N/A',
-                    'Workshop': workshop ? workshop.name : 'N/A',
-                    'Skor Ringkas': audit.scores.ringkas,
-                    'Skor Rapi': audit.scores.rapi,
-                    'Skor Resik': audit.scores.resik,
-                    'Skor Rawat': audit.scores.rawat,
-                    'Skor Rajin': audit.scores.rajin,
+                    'Tanggal': new Date(audit.timestamp.seconds * 1000).toLocaleDateString('id-ID'), 'NIK': employee?.nik || 'N/A', 'Karyawan': employee?.name || 'N/A', 'Workshop': workshop?.name || 'N/A',
+                    'Skor Ringkas': audit.scores.ringkas, 'Skor Rapi': audit.scores.rapi, 'Skor Resik': audit.scores.resik, 'Skor Rawat': audit.scores.rawat, 'Skor Rajin': audit.scores.rajin,
                     'Total Skor': audit.totalScore
                 };
             });
-
             const worksheet = XLSX.utils.json_to_sheet(dataToExport);
             const workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet, "Laporan Audit 5R");
             XLSX.writeFile(workbook, "Laporan-Audit-5R.xlsx");
             showToast('Laporan Excel berhasil dibuat.');
-        }
+        };
 
-
-        // Final setup
         window.onload = () => {
             lucide.createIcons();
             handleAuthentication();
